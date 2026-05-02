@@ -23,6 +23,7 @@ const EXT: Omit<Stock, keyof GarpRaw | "yearsTo100x" | "hundredBaggerScore"> = {
   dividendYield: 0, dividendRate: 0, payoutRatio: 0, fiveYearAvgDividendYield: 0,
   return52w: 0, returnVsSP500: 0, return3m: 0, return1m: 0,
   pctFromHigh: 0, volumeTrend: 0, shortPercentOfFloat: 0, analystRating: 0,
+  price: 0,
 };
 
 const rawBase: GarpRaw[] = [

@@ -289,6 +289,7 @@ async function fetchOneTicker(ticker: string): Promise<StockData | null> {
       volumeTrend,
       shortPercentOfFloat,
       analystRating,
+      price: round2(regularMarketPrice),
     });
   } catch (err) {
     logger.warn({ ticker, err: (err as Error).message }, "Skipping ticker");

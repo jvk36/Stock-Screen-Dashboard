@@ -25,8 +25,8 @@ const FILTER_CONTROLS: FilterControl[] = [
 
 const COLUMNS: ColumnDef[] = [
   {
-    key: "rank", header: "#", align: "right", sortKey: "rank",
-    render: (s) => <span className="text-muted-foreground font-mono text-xs">{s.rank}</span>,
+    key: "price", header: "Price", align: "right", sortKey: "price",
+    render: (s) => <span className="font-mono text-sm text-foreground">{s.price > 0 ? `$${s.price.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : "—"}</span>,
   },
   {
     key: "ticker", header: "Ticker", sortKey: "ticker",

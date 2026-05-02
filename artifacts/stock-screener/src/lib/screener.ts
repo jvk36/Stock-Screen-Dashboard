@@ -39,6 +39,8 @@ export interface Stock {
   // ── Asymmetric ─────────────────────────────────────────────────────────
   shortPercentOfFloat: number; // decimal e.g. 0.12 = 12% short
   analystRating: number;       // 1=strong buy … 5=strong sell, 0=no data
+  // ── Price ──────────────────────────────────────────────────────────────
+  price: number;               // current market price (USD)
 }
 
 export interface ScoredStock extends Stock {

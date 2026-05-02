@@ -55,6 +55,8 @@ const stockShape = zod.object({
   // Asymmetric
   shortPercentOfFloat: zod.number(),
   analystRating: zod.number(),
+  // Price
+  price: zod.number(),
 });
 
 /**

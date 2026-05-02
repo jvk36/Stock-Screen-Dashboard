@@ -65,6 +65,8 @@ export interface Stock {
   // Asymmetric
   shortPercentOfFloat: number;
   analystRating: number;
+  // Price
+  price: number;
 }
 
 export interface ApiError {
