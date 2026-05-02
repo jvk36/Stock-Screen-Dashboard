@@ -87,6 +87,10 @@ const raw: RawStock[] = [
   { ticker: "NRGN", company: "NuEnergon Renewables", sector: "Energy", marketCap: "Mid", epsGrowth5yr: 0.09, consecutiveYearsAbove16: 0, pegRatio: 2.88, forwardPE: 26.0, revenueGrowth3yr: 0.07, roe: 0.12, netMargin: 0.09, debtToEquity: 1.60 },
   { ticker: "WTRK", company: "Watermark Financial", sector: "Financials", marketCap: "Mid", epsGrowth5yr: 0.08, consecutiveYearsAbove16: 0, pegRatio: 3.00, forwardPE: 24.0, revenueGrowth3yr: 0.06, roe: 0.11, netMargin: 0.19, debtToEquity: 1.05 },
   { ticker: "BNCR", company: "Bancroft Trust", sector: "Financials", marketCap: "Large", epsGrowth5yr: 0.06, consecutiveYearsAbove16: 0, pegRatio: 3.33, forwardPE: 20.0, revenueGrowth3yr: 0.04, roe: 0.09, netMargin: 0.16, debtToEquity: 1.30 },
+  { ticker: "APXT", company: "Apex Technologies", sector: "Information Technology", marketCap: "Large", epsGrowth5yr: 0.25, consecutiveYearsAbove16: 6, pegRatio: 1.20, forwardPE: 30.0, revenueGrowth3yr: 0.23, roe: 0.36, netMargin: 0.20, debtToEquity: 0.27 },
+  { ticker: "DRVN", company: "Driven Mobility", sector: "Consumer Discretionary", marketCap: "Mid", epsGrowth5yr: 0.18, consecutiveYearsAbove16: 4, pegRatio: 1.78, forwardPE: 32.0, revenueGrowth3yr: 0.16, roe: 0.22, netMargin: 0.11, debtToEquity: 0.66 },
+  { ticker: "GLXS", company: "Galaxis Defense Systems", sector: "Industrials", marketCap: "Mid", epsGrowth5yr: 0.17, consecutiveYearsAbove16: 3, pegRatio: 1.85, forwardPE: 31.5, revenueGrowth3yr: 0.14, roe: 0.20, netMargin: 0.10, debtToEquity: 0.88 },
+  { ticker: "PCLD", company: "Purecell Diagnostics", sector: "Health Care", marketCap: "Small", epsGrowth5yr: 0.20, consecutiveYearsAbove16: 5, pegRatio: 1.42, forwardPE: 28.4, revenueGrowth3yr: 0.18, roe: 0.28, netMargin: 0.15, debtToEquity: 0.40 },
 ];
 
 export const mockStocks = raw.map(calculateMetrics);

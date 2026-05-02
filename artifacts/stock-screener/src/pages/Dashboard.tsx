@@ -27,21 +27,21 @@ export default function Dashboard() {
           <div className="py-3 font-medium text-primary border-b-2 border-primary px-1">
             GARP
           </div>
-          <div className="py-3 text-muted-foreground px-1 flex items-center gap-2 cursor-not-allowed group">
+          <div className="py-3 text-muted-foreground px-1 flex items-center gap-2 cursor-not-allowed">
             Value
-            <Badge variant="secondary" className="text-[9px] h-4 px-1 py-0 opacity-0 group-hover:opacity-100 transition-opacity">Coming Soon</Badge>
+            <Badge variant="secondary" className="text-[9px] h-4 px-1 py-0">Coming Soon</Badge>
           </div>
-          <div className="py-3 text-muted-foreground px-1 flex items-center gap-2 cursor-not-allowed group">
+          <div className="py-3 text-muted-foreground px-1 flex items-center gap-2 cursor-not-allowed">
             Momentum
-            <Badge variant="secondary" className="text-[9px] h-4 px-1 py-0 opacity-0 group-hover:opacity-100 transition-opacity">Coming Soon</Badge>
+            <Badge variant="secondary" className="text-[9px] h-4 px-1 py-0">Coming Soon</Badge>
           </div>
-          <div className="py-3 text-muted-foreground px-1 flex items-center gap-2 cursor-not-allowed group">
+          <div className="py-3 text-muted-foreground px-1 flex items-center gap-2 cursor-not-allowed">
             Quality
-            <Badge variant="secondary" className="text-[9px] h-4 px-1 py-0 opacity-0 group-hover:opacity-100 transition-opacity">Coming Soon</Badge>
+            <Badge variant="secondary" className="text-[9px] h-4 px-1 py-0">Coming Soon</Badge>
           </div>
-          <div className="py-3 text-muted-foreground px-1 flex items-center gap-2 cursor-not-allowed group">
+          <div className="py-3 text-muted-foreground px-1 flex items-center gap-2 cursor-not-allowed">
             Dividend
-            <Badge variant="secondary" className="text-[9px] h-4 px-1 py-0 opacity-0 group-hover:opacity-100 transition-opacity">Coming Soon</Badge>
+            <Badge variant="secondary" className="text-[9px] h-4 px-1 py-0">Coming Soon</Badge>
           </div>
         </div>
       </header>
