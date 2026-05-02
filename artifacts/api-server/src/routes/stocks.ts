@@ -105,29 +105,69 @@ function calculateMetrics(
 }
 
 const TICKERS = [
-  // ── Technology ──────────────────────────────────────────────────────────
+  // ── Information Technology — Mega/Large ──────────────────────────────────
   "AAPL", "MSFT", "NVDA", "AVGO", "ADBE", "CRM", "AMD",
   "QCOM", "TXN", "AMAT", "MRVL", "PANW", "CRWD", "SNPS", "CDNS",
   "NOW", "WDAY", "FTNT", "DDOG", "ZS", "NET", "MDB",
-  // ── Communication / Consumer ─────────────────────────────────────────────
-  "AMZN", "GOOGL", "META", "NFLX", "COST", "MCD", "NKE", "LULU", "CMG",
-  // ── Financials ───────────────────────────────────────────────────────────
+  "ORCL", "IBM", "ACN", "INTU", "KLAC", "LRCX", "ASML",
+  // ── Information Technology — Mid/Small ───────────────────────────────────
+  "GTLB", "HUBS", "TWLO", "PCTY", "PAYC", "TOST", "BILL",
+  "APP", "TTD", "PUBM", "MGNI", "RAMP", "DV",
+  "SMCI", "NTAP", "PSTG", "WDC", "STX",
+  "SMAR", "ASAN", "BRZE", "ESTC",
+  "CWAN", "ALKT", "JAMF", "GWRE", "KLIC",
+  // ── Communication Services ───────────────────────────────────────────────
+  "GOOGL", "META", "NFLX", "SNAP", "PINS", "RDDT",
+  "PARA", "WBD", "LYV", "IACI",
+  // ── Consumer Discretionary — Large ───────────────────────────────────────
+  "AMZN", "TSLA", "MCD", "NKE", "LULU", "CMG", "BKNG",
+  "TJX", "ROST", "BBY", "DRI", "YUM", "SBUX",
+  // ── Consumer Discretionary — Mid/Small ───────────────────────────────────
+  "CHWY", "WRBY", "XPOF", "MODG", "PLNT",
+  "RCL", "CCL", "HLT", "MAR", "H",
+  "WING", "TXRH", "DENN", "EAT",
+  // ── Consumer Staples ─────────────────────────────────────────────────────
+  "PG", "KO", "PEP", "WMT", "COST", "DIS",
+  "MO", "PM", "BTI", "KMB", "CL", "CHD",
+  "SYY", "KR", "GO", "CASY",
+  // ── Financials — Large ───────────────────────────────────────────────────
   "JPM", "V", "MA", "AXP", "BLK", "SPGI", "MCO", "GS", "MS",
-  // ── Health Care ──────────────────────────────────────────────────────────
+  "BAC", "WFC", "C", "USB", "PNC", "TFC",
+  "CB", "AIG", "MET", "PRU",
+  // ── Financials — Mid/Small ───────────────────────────────────────────────
+  "LPLA", "RJF", "SEIC", "VRTS",
+  "COOP", "PFSI", "RKT",
+  "IBOC", "FFIN", "FNB", "COLB",
+  // ── Health Care — Large ──────────────────────────────────────────────────
   "UNH", "LLY", "ABBV", "TMO", "DHR", "ISRG", "DXCM",
-  "JNJ", "ABT", "MDT",
-  // ── Industrials ──────────────────────────────────────────────────────────
+  "JNJ", "ABT", "MDT", "BMY", "MRK", "PFE", "AMGN", "GILD",
+  "CVS", "HUM", "ELV", "CI",
+  // ── Health Care — Mid/Small ──────────────────────────────────────────────
+  "INSM", "RXRX", "RCKT", "IONS", "EXAS",
+  "ACAD", "ITCI", "AGIO", "KROS",
+  "IRTC", "INSP", "NVCR", "GKOS",
+  "OMCL", "NTRA", "VEEV", "DOCS",
+  // ── Industrials — Large ──────────────────────────────────────────────────
   "HON", "CAT", "DE", "RTX", "UPS", "MMM", "LOW",
+  "GE", "ETN", "EMR", "PH", "ROK", "FTV",
+  // ── Industrials — Mid/Small ──────────────────────────────────────────────
+  "AXON", "TDY", "LDOS", "CACI", "SAIC",
+  "GNRC", "TREX", "BECN", "IBP", "BLDR",
+  "CSGP", "CPRT", "VRSK", "RBA",
   // ── Energy ───────────────────────────────────────────────────────────────
-  "XOM", "CVX", "COP",
-  // ── Consumer Staples / Dividend ──────────────────────────────────────────
-  "DIS", "PG", "KO", "PEP", "WMT", "HD",
-  "MO", "T", "VZ",
+  "XOM", "CVX", "COP", "EOG", "SLB", "PSX", "VLO", "MPC",
+  "FANG", "DVN", "OXY", "HES", "NOV",
+  "RRC", "AR", "CIVI", "CHRD",
   // ── Real Estate ──────────────────────────────────────────────────────────
-  "AMT", "EQIX", "PLD", "O",
-  // ── Materials / Utilities ────────────────────────────────────────────────
-  "LIN", "APD",
-  "NEE", "DUK", "D",
+  "AMT", "EQIX", "PLD", "O", "SPG", "WELL",
+  "DLR", "PSA", "EXR", "AVB", "EQR",
+  "REXR", "COLD", "STAG", "IIPR",
+  // ── Materials ────────────────────────────────────────────────────────────
+  "LIN", "APD", "SHW", "ECL", "NEM", "FCX",
+  "ALB", "AVNT", "EMN", "RPM",
+  // ── Utilities ────────────────────────────────────────────────────────────
+  "NEE", "DUK", "D", "SO", "AEP", "EXC", "SRE",
+  "PCG", "XEL", "WEC", "ES",
 ];
 
 const SECTOR_MAP: Record<string, string> = {
