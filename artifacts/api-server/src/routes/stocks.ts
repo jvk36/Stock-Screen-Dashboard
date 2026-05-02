@@ -168,6 +168,40 @@ const TICKERS = [
   // ── Utilities ────────────────────────────────────────────────────────────
   "NEE", "DUK", "D", "SO", "AEP", "EXC", "SRE",
   "PCG", "XEL", "WEC", "ES",
+
+  // ── Mid Cap targeted ($2B–$10B) ──────────────────────────────────────────
+  // Fintech / consumer finance
+  "HIMS", "UPST", "FCFS", "ALKS",
+  // Media / services
+  "NXST", "JOBY", "ACHR",
+  // Tech / software
+  "SPSC", "QLYS", "HQY", "SLAB", "ONTO", "FORM", "AEIS",
+  // Retail / consumer
+  "BOOT", "FIVE", "OLLI", "CELH", "TGTX",
+  // Defense / industrial
+  "KTOS", "AVAV",
+  // Clean energy
+  "ARRY", "HASI",
+  // Healthcare devices / biotech
+  "PRCT", "TMDX", "CRNX",
+
+  // ── Small Cap targeted ($300M–$2B) ───────────────────────────────────────
+  // Fintech / finance
+  "LMND", "PRAA", "WRLD", "XMTR",
+  // Real estate / proptech
+  "OPEN", "RDFN", "EXPI",
+  // Retail / consumer
+  "CATO", "LESL", "SCVL", "SFIX", "LOVE",
+  // Biotech / healthcare
+  "NVAX", "PACB", "ACRS", "TGTX",
+  // Clean energy / EV
+  "CHPT", "EVGO", "SEDG",
+  // Tech / media
+  "VMEO", "BB", "TLRY",
+
+  // ── Micro Cap targeted (<$300M) ──────────────────────────────────────────
+  "BLNK", "MVIS", "WKHS", "BYND",
+  "GRWG", "SGMO", "NOVA", "CLOV",
 ];
 
 const SECTOR_MAP: Record<string, string> = {
