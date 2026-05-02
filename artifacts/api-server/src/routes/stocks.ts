@@ -59,6 +59,8 @@ interface StockData {
   // Asymmetric
   shortPercentOfFloat: number;
   analystRating: number;
+  // Price
+  price: number;
 }
 
 function round2(n: number) {
