@@ -193,7 +193,7 @@ const TICKERS = [
   // Retail / consumer
   "CATO", "LESL", "SCVL", "SFIX", "LOVE",
   // Biotech / healthcare
-  "NVAX", "PACB", "ACRS", "TGTX",
+  "NVAX", "PACB", "ACRS",
   // Clean energy / EV
   "CHPT", "EVGO", "SEDG",
   // Tech / media
