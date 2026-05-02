@@ -170,38 +170,32 @@ const TICKERS = [
   "PCG", "XEL", "WEC", "ES",
 
   // ── Mid Cap targeted ($2B–$10B) ──────────────────────────────────────────
-  // Fintech / consumer finance
-  "HIMS", "UPST", "FCFS", "ALKS",
-  // Media / services
-  "NXST", "JOBY", "ACHR",
-  // Tech / software
+  "HIMS", "FCFS", "ALKS", "NXST",
   "SPSC", "QLYS", "HQY", "SLAB", "ONTO", "FORM", "AEIS",
-  // Retail / consumer
-  "BOOT", "FIVE", "OLLI", "CELH", "TGTX",
-  // Defense / industrial
-  "KTOS", "AVAV",
-  // Clean energy
-  "ARRY", "HASI",
-  // Healthcare devices / biotech
-  "PRCT", "TMDX", "CRNX",
+  "FIVE", "OLLI", "CELH", "TGTX",
+  "KTOS", "AVAV", "HASI", "ARRY",
+  "PRCT", "TMDX", "BB", "SEDG",
 
   // ── Small Cap targeted ($300M–$2B) ───────────────────────────────────────
-  // Fintech / finance
-  "LMND", "PRAA", "WRLD", "XMTR",
-  // Real estate / proptech
-  "OPEN", "RDFN", "EXPI",
+  // Community banks / financial
+  "PRAA", "WRLD", "CSWC", "HCKT",
   // Retail / consumer
-  "CATO", "LESL", "SCVL", "SFIX", "LOVE",
-  // Biotech / healthcare
-  "NVAX", "PACB", "ACRS",
-  // Clean energy / EV
-  "CHPT", "EVGO", "SEDG",
-  // Tech / media
-  "VMEO", "BB", "TLRY",
+  "SCVL", "CATO", "LOVE", "DXPE",
+  // Healthcare services / devices
+  "ADUS", "AMSF", "ACNB", "NBTB",
+  // Industrial / specialty
+  "SXI", "GFF", "THRM", "UFPI",
+  // Technology
+  "EXPI", "VRNS", "PUBM", "NKTR",
+  // Energy
+  "REX", "TRGP", "SWN", "CIVI",
 
   // ── Micro Cap targeted (<$300M) ──────────────────────────────────────────
-  "BLNK", "MVIS", "WKHS", "BYND",
-  "GRWG", "SGMO", "NOVA", "CLOV",
+  // Community banks (always have sector data)
+  "FCCO", "MFIN", "ESSA", "CZWI",
+  "LBAI", "BSVN", "FFIC", "PBHC",
+  // Small industrials / consumer
+  "KBAL", "XPER", "ARII", "TLYS",
 ];
 
 const SECTOR_MAP: Record<string, string> = {
