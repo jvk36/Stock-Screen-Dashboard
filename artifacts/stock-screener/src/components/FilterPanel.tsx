@@ -1,4 +1,4 @@
-import { FilterState } from "../lib/screener";
+import { FilterState, ALL_SECTORS } from "../lib/screener";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -12,24 +12,9 @@ interface FilterPanelProps {
   filteredCount: number;
 }
 
-const allSectors = [
-  "Information Technology",
-  "Health Care",
-  "Financials",
-  "Consumer Discretionary",
-  "Communication Services",
-  "Industrials",
-  "Consumer Staples",
-  "Energy",
-  "Utilities",
-  "Real Estate",
-  "Materials"
-];
-
 const allMarketCaps = ["Mega", "Large", "Mid", "Small", "Micro"];
 
 export function FilterPanel({ filters, setFilters, defaultFilters, totalStocks, filteredCount }: FilterPanelProps) {
-  
   const handleReset = () => setFilters(defaultFilters);
 
   const toggleMarketCap = (mc: string) => {
@@ -40,22 +25,16 @@ export function FilterPanel({ filters, setFilters, defaultFilters, totalStocks, 
   };
 
   const toggleSector = (sector: string) => {
-    let newSectors = [...filters.sectors];
-    if (newSectors.includes(sector)) {
-      newSectors = newSectors.filter(s => s !== sector);
-    } else {
-      newSectors.push(sector);
-    }
-    // If all selected, we can keep it as empty to represent "all" or explicit all
+    const newSectors = filters.sectors.includes(sector)
+      ? filters.sectors.filter(s => s !== sector)
+      : [...filters.sectors, sector];
     setFilters({ ...filters, sectors: newSectors });
   };
 
+  const allSectorsSelected = filters.sectors.length === ALL_SECTORS.length;
+
   const toggleAllSectors = () => {
-    if (filters.sectors.length === 0) {
-      setFilters({ ...filters, sectors: [...allSectors] });
-    } else {
-      setFilters({ ...filters, sectors: [] });
-    }
+    setFilters({ ...filters, sectors: allSectorsSelected ? [] : [...ALL_SECTORS] });
   };
 
   return (
@@ -84,8 +63,7 @@ export function FilterPanel({ filters, setFilters, defaultFilters, totalStocks, 
               onValueChange={([v]) => setFilters({ ...filters, epsGrowth: v })}
               data-testid="slider-eps-growth"
             />
-            {/* 16% marker */}
-            <div className="absolute left-[45.7%] top-8 w-[2px] h-3 bg-amber-500/50" title="100-bagger line (16%)"></div>
+            <div className="absolute left-[45.7%] top-8 w-[2px] h-3 bg-amber-500/50" title="100-bagger line (16%)" />
             <div className="absolute left-[41%] top-11 text-[10px] text-amber-500/70 font-mono">16% line</div>
           </div>
         </div>
@@ -108,7 +86,7 @@ export function FilterPanel({ filters, setFilters, defaultFilters, totalStocks, 
         <div className="space-y-3">
           <div className="flex justify-between items-center">
             <Label>Forward P/E</Label>
-            <span className="text-sm font-medium text-foreground">{filters.fwdPeMin} - {filters.fwdPeMax}</span>
+            <span className="text-sm font-medium text-foreground">{filters.fwdPeMin} &ndash; {filters.fwdPeMax}</span>
           </div>
           <Slider
             value={[filters.fwdPeMin, filters.fwdPeMax]}
@@ -180,8 +158,8 @@ export function FilterPanel({ filters, setFilters, defaultFilters, totalStocks, 
           <div className="space-y-2">
             {allMarketCaps.map(mc => (
               <div key={mc} className="flex items-center space-x-2">
-                <Checkbox 
-                  id={`mc-${mc}`} 
+                <Checkbox
+                  id={`mc-${mc}`}
                   checked={filters.marketCaps.includes(mc)}
                   onCheckedChange={() => toggleMarketCap(mc)}
                   data-testid={`checkbox-mc-${mc}`}
@@ -199,32 +177,23 @@ export function FilterPanel({ filters, setFilters, defaultFilters, totalStocks, 
           <div className="flex items-center justify-between mb-2">
             <Label>Sector</Label>
             <Button variant="link" className="text-xs h-auto p-0 text-muted-foreground" onClick={toggleAllSectors}>
-              {filters.sectors.length === 0 ? "Deselect All" : "Select All"}
+              {allSectorsSelected ? "Deselect All" : "Select All"}
             </Button>
           </div>
           <div className="space-y-2 max-h-48 overflow-y-auto pr-2 scrollbar-thin">
-            {allSectors.map(sector => {
-              const isChecked = filters.sectors.length === 0 || filters.sectors.includes(sector);
-              return (
-                <div key={sector} className="flex items-center space-x-2">
-                  <Checkbox 
-                    id={`sector-${sector}`} 
-                    checked={isChecked}
-                    onCheckedChange={() => {
-                      if (filters.sectors.length === 0) {
-                        setFilters({ ...filters, sectors: allSectors.filter(s => s !== sector) });
-                      } else {
-                        toggleSector(sector);
-                      }
-                    }}
-                    data-testid={`checkbox-sector-${sector.replace(/\s/g, '-')}`}
-                  />
-                  <label htmlFor={`sector-${sector}`} className="text-sm text-muted-foreground cursor-pointer leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                    {sector}
-                  </label>
-                </div>
-              );
-            })}
+            {ALL_SECTORS.map(sector => (
+              <div key={sector} className="flex items-center space-x-2">
+                <Checkbox
+                  id={`sector-${sector}`}
+                  checked={filters.sectors.includes(sector)}
+                  onCheckedChange={() => toggleSector(sector)}
+                  data-testid={`checkbox-sector-${sector.replace(/\s/g, '-')}`}
+                />
+                <label htmlFor={`sector-${sector}`} className="text-sm text-muted-foreground cursor-pointer leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  {sector}
+                </label>
+              </div>
+            ))}
           </div>
         </div>
       </div>

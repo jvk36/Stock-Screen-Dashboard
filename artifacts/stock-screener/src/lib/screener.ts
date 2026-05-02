@@ -46,6 +46,20 @@ export function calculateMetrics(stock: Omit<Stock, "yearsTo100x" | "hundredBagg
   };
 }
 
+export const ALL_SECTORS = [
+  "Information Technology",
+  "Health Care",
+  "Financials",
+  "Consumer Discretionary",
+  "Communication Services",
+  "Industrials",
+  "Consumer Staples",
+  "Energy",
+  "Utilities",
+  "Real Estate",
+  "Materials"
+] as const;
+
 export interface FilterState {
   epsGrowth: number;
   pegMin: number;
@@ -71,7 +85,7 @@ export const defaultFilters: FilterState = {
   netMarginMin: 8,
   debtEqMax: 1.5,
   marketCaps: ["Mega", "Large", "Mid", "Small", "Micro"],
-  sectors: [] // Empty means all
+  sectors: [...ALL_SECTORS],
 };
 
 export function filterStocks(stocks: Stock[], filters: FilterState): Stock[] {
@@ -84,7 +98,7 @@ export function filterStocks(stocks: Stock[], filters: FilterState): Stock[] {
     if (s.netMargin * 100 < filters.netMarginMin) return false;
     if (s.debtToEquity > filters.debtEqMax) return false;
     if (!filters.marketCaps.includes(s.marketCap)) return false;
-    if (filters.sectors.length > 0 && !filters.sectors.includes(s.sector)) return false;
+    if (!filters.sectors.includes(s.sector)) return false;
     return true;
   });
 }
