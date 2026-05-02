@@ -27,4 +27,24 @@ export interface Stock {
   debtToEquity: number;
   yearsTo100x: number;
   hundredBaggerScore: number;
+  trailingPE: number;
+  priceToBook: number;
+  evToEbitda: number;
+  fcfYield: number;
+  returnOnAssets: number;
+  grossMargin: number;
+  operatingMargin: number;
+  currentRatio: number;
+  dividendYield: number;
+  dividendRate: number;
+  payoutRatio: number;
+  fiveYearAvgDividendYield: number;
+  return52w: number;
+  returnVsSP500: number;
+  return3m: number;
+  return1m: number;
+  pctFromHigh: number;
+  volumeTrend: number;
+  shortPercentOfFloat: number;
+  analystRating: number;
 }

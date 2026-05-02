@@ -1,9 +1,31 @@
 import { calculateMetrics } from "../lib/screener";
 import type { Stock } from "../lib/screener";
 
-type RawStock = Omit<Stock, "yearsTo100x" | "hundredBaggerScore">;
+// Base GARP fields only — extended fields default to 0 for fallback mode
+type GarpRaw = {
+  ticker: string;
+  company: string;
+  sector: string;
+  marketCap: "Mega" | "Large" | "Mid" | "Small" | "Micro";
+  epsGrowth5yr: number;
+  consecutiveYearsAbove16: number;
+  pegRatio: number;
+  forwardPE: number;
+  revenueGrowth3yr: number;
+  roe: number;
+  netMargin: number;
+  debtToEquity: number;
+};
 
-const raw: RawStock[] = [
+const EXT: Omit<Stock, keyof GarpRaw | "yearsTo100x" | "hundredBaggerScore"> = {
+  trailingPE: 0, priceToBook: 0, evToEbitda: 0, fcfYield: 0,
+  returnOnAssets: 0, grossMargin: 0, operatingMargin: 0, currentRatio: 0,
+  dividendYield: 0, dividendRate: 0, payoutRatio: 0, fiveYearAvgDividendYield: 0,
+  return52w: 0, returnVsSP500: 0, return3m: 0, return1m: 0,
+  pctFromHigh: 0, volumeTrend: 0, shortPercentOfFloat: 0, analystRating: 0,
+};
+
+const rawBase: GarpRaw[] = [
   // ── GARP TIER: epsGrowth >= 0.15, pass all default filters ──────────────────
   { ticker: "NVLX", company: "Novex Semiconductor", sector: "Information Technology", marketCap: "Large", epsGrowth5yr: 0.29, consecutiveYearsAbove16: 7, pegRatio: 1.12, forwardPE: 33.4, revenueGrowth3yr: 0.26, roe: 0.44, netMargin: 0.22, debtToEquity: 0.18 },
   { ticker: "CLUD", company: "Cloudspan Systems", sector: "Information Technology", marketCap: "Large", epsGrowth5yr: 0.24, consecutiveYearsAbove16: 6, pegRatio: 1.38, forwardPE: 33.1, revenueGrowth3yr: 0.22, roe: 0.31, netMargin: 0.18, debtToEquity: 0.35 },
@@ -30,7 +52,6 @@ const raw: RawStock[] = [
   { ticker: "PRYZ", company: "Prizm Consumer Brands", sector: "Consumer Staples", marketCap: "Large", epsGrowth5yr: 0.16, consecutiveYearsAbove16: 3, pegRatio: 1.75, forwardPE: 28.0, revenueGrowth3yr: 0.13, roe: 0.21, netMargin: 0.12, debtToEquity: 0.88 },
   { ticker: "MLTA", company: "Multa Materials", sector: "Materials", marketCap: "Mid", epsGrowth5yr: 0.17, consecutiveYearsAbove16: 3, pegRatio: 1.76, forwardPE: 29.9, revenueGrowth3yr: 0.14, roe: 0.22, netMargin: 0.11, debtToEquity: 0.72 },
   { ticker: "RNWX", company: "Renewex Power", sector: "Utilities", marketCap: "Large", epsGrowth5yr: 0.15, consecutiveYearsAbove16: 2, pegRatio: 1.99, forwardPE: 29.8, revenueGrowth3yr: 0.12, roe: 0.17, netMargin: 0.10, debtToEquity: 1.30 },
-
   // ── NEAR-GARP TIER: epsGrowth 0.10–0.149 ────────────────────────────────────
   { ticker: "CRST", company: "Crestview Software", sector: "Information Technology", marketCap: "Large", epsGrowth5yr: 0.14, consecutiveYearsAbove16: 1, pegRatio: 2.10, forwardPE: 29.4, revenueGrowth3yr: 0.12, roe: 0.20, netMargin: 0.13, debtToEquity: 0.60 },
   { ticker: "PRXM", company: "Proxima Networks", sector: "Information Technology", marketCap: "Mid", epsGrowth5yr: 0.13, consecutiveYearsAbove16: 1, pegRatio: 2.23, forwardPE: 29.0, revenueGrowth3yr: 0.11, roe: 0.18, netMargin: 0.12, debtToEquity: 0.70 },
@@ -60,7 +81,6 @@ const raw: RawStock[] = [
   { ticker: "VLCN", company: "Vulcan Real Estate Income", sector: "Real Estate", marketCap: "Large", epsGrowth5yr: 0.12, consecutiveYearsAbove16: 0, pegRatio: 2.50, forwardPE: 30.0, revenueGrowth3yr: 0.10, roe: 0.15, netMargin: 0.18, debtToEquity: 1.40 },
   { ticker: "PRMX", company: "Primex Utilities", sector: "Utilities", marketCap: "Large", epsGrowth5yr: 0.11, consecutiveYearsAbove16: 0, pegRatio: 2.63, forwardPE: 28.9, revenueGrowth3yr: 0.09, roe: 0.14, netMargin: 0.10, debtToEquity: 1.40 },
   { ticker: "ENRX", company: "Enrex Power Grid", sector: "Utilities", marketCap: "Mid", epsGrowth5yr: 0.10, consecutiveYearsAbove16: 0, pegRatio: 2.80, forwardPE: 28.0, revenueGrowth3yr: 0.08, roe: 0.13, netMargin: 0.09, debtToEquity: 1.45 },
-
   // ── BELOW THRESHOLD: epsGrowth < 0.10, show up only when filters loosened ───
   { ticker: "LGCY", company: "Legacy Software Corp", sector: "Information Technology", marketCap: "Mega", epsGrowth5yr: 0.07, consecutiveYearsAbove16: 0, pegRatio: 3.10, forwardPE: 21.7, revenueGrowth3yr: 0.05, roe: 0.14, netMargin: 0.18, debtToEquity: 0.55 },
   { ticker: "HLDG", company: "Holding Pattern Networks", sector: "Information Technology", marketCap: "Large", epsGrowth5yr: 0.09, consecutiveYearsAbove16: 0, pegRatio: 2.88, forwardPE: 25.9, revenueGrowth3yr: 0.07, roe: 0.12, netMargin: 0.14, debtToEquity: 0.75 },
@@ -93,4 +113,4 @@ const raw: RawStock[] = [
   { ticker: "PCLD", company: "Purecell Diagnostics", sector: "Health Care", marketCap: "Small", epsGrowth5yr: 0.20, consecutiveYearsAbove16: 5, pegRatio: 1.42, forwardPE: 28.4, revenueGrowth3yr: 0.18, roe: 0.28, netMargin: 0.15, debtToEquity: 0.40 },
 ];
 
-export const mockStocks = raw.map(calculateMetrics);
+export const mockStocks: Stock[] = rawBase.map((s) => calculateMetrics({ ...EXT, ...s }));

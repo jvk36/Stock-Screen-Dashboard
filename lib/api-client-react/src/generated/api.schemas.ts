@@ -40,6 +40,31 @@ export interface Stock {
   debtToEquity: number;
   yearsTo100x: number;
   hundredBaggerScore: number;
+  // Deep Value
+  trailingPE: number;
+  priceToBook: number;
+  evToEbitda: number;
+  fcfYield: number;
+  // Quality
+  returnOnAssets: number;
+  grossMargin: number;
+  operatingMargin: number;
+  currentRatio: number;
+  // Dividend Growth
+  dividendYield: number;
+  dividendRate: number;
+  payoutRatio: number;
+  fiveYearAvgDividendYield: number;
+  // Momentum / Trending / Asymmetric
+  return52w: number;
+  returnVsSP500: number;
+  return3m: number;
+  return1m: number;
+  pctFromHigh: number;
+  volumeTrend: number;
+  // Asymmetric
+  shortPercentOfFloat: number;
+  analystRating: number;
 }
 
 export interface ApiError {

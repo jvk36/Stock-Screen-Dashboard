@@ -1,44 +1,60 @@
 import { useState, useMemo } from "react";
 import { FilterPanel } from "@/components/FilterPanel";
 import { StockTable } from "@/components/StockTable";
+import { StrategyBanner } from "@/components/StrategyBanner";
 import { defaultFilters, filterStocks } from "@/lib/screener";
 import type { Stock } from "@/lib/screener";
-import { Badge } from "@/components/ui/badge";
 import { useGetStocks, getGetStocksQueryKey } from "@workspace/api-client-react";
 import { mockStocks } from "@/data/mockStocks";
+import { DeepValueTab } from "@/pages/tabs/DeepValueTab";
+import { MomentumTab } from "@/pages/tabs/MomentumTab";
+import { QualityTab } from "@/pages/tabs/QualityTab";
+import { DividendTab } from "@/pages/tabs/DividendTab";
+import { AsymmetricTab } from "@/pages/tabs/AsymmetricTab";
+import { TrendingTab } from "@/pages/tabs/TrendingTab";
 
 type DataMode = "live" | "demo-fallback" | "loading";
 
+type TabId = "garp" | "deep-value" | "momentum" | "quality" | "dividend" | "asymmetric" | "trending";
+
+const TABS: { id: TabId; label: string }[] = [
+  { id: "garp",       label: "GARP" },
+  { id: "deep-value", label: "Deep Value" },
+  { id: "momentum",   label: "Momentum" },
+  { id: "quality",    label: "Quality" },
+  { id: "dividend",   label: "Dividend" },
+  { id: "asymmetric", label: "Asymmetric" },
+  { id: "trending",   label: "Trending" },
+];
+
+const GARP_BANNER =
+  "At ~16% annual EPS growth, a stock compounds to 100\u00d7 in ~30 years \u2014 at 20%, it takes just 25. \
+The GARP screener surfaces companies on this trajectory \u2014 growing fast enough to be transformative, \
+priced reasonably enough to buy today.";
+
 export default function Dashboard() {
+  const [activeTab, setActiveTab] = useState<TabId>("garp");
   const [filters, setFilters] = useState(defaultFilters);
 
   const { data, isLoading, isError, error } = useGetStocks({
     query: {
       queryKey: getGetStocksQueryKey(),
       staleTime: 5 * 60 * 1000,
-      // Never retry on error — 5xx errors (quota exhausted, misconfigured)
-      // waste the daily API quota if retried automatically.
       retry: false,
     },
   });
 
-  // Determine data mode and canonical stocks source.
-  // A successful API response (data !== undefined) is always authoritative —
-  // even if it returns an empty array. Mock fallback is only used when the
-  // request fails outright (network error, 5xx, etc.).
   const { allStocks, dataMode, errorKind } = useMemo(() => {
     if (isLoading) {
       return { allStocks: [] as Stock[], dataMode: "loading" as DataMode, errorKind: null };
     }
     if (data !== undefined) {
-      // Successful response — treat as live data even if stocks is empty
       return {
         allStocks: (data.stocks ?? []) as Stock[],
         dataMode: "live" as DataMode,
         errorKind: null,
       };
     }
-    // Request failed — determine why and fall back to demo data
     const status = (error as { status?: number } | null)?.status;
     const kind =
       status === 503 ? "unavailable"
@@ -48,13 +64,12 @@ export default function Dashboard() {
     return { allStocks: mockStocks, dataMode: "demo-fallback" as DataMode, errorKind: kind };
   }, [isLoading, data, isError, error]);
 
-  const filteredStocks = useMemo(() => {
-    return filterStocks(allStocks, filters);
-  }, [allStocks, filters]);
+  const filteredStocks = useMemo(() => filterStocks(allStocks, filters), [allStocks, filters]);
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
-      <header className="border-b border-border bg-card">
+      {/* ── Header ──────────────────────────────────────────────────────── */}
+      <header className="border-b border-border bg-card sticky top-0 z-10">
         <div className="px-6 py-4 flex items-center justify-between">
           <h1 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-primary inline-block" />
@@ -92,55 +107,56 @@ export default function Dashboard() {
             )}
           </div>
         </div>
-        <div className="px-6 flex gap-6 text-sm border-t border-border/50">
-          <div className="py-3 font-medium text-primary border-b-2 border-primary px-1">
-            GARP
-          </div>
-          <div className="py-3 text-muted-foreground px-1 flex items-center gap-2 cursor-not-allowed">
-            Value
-            <Badge variant="secondary" className="text-[9px] h-4 px-1 py-0">Coming Soon</Badge>
-          </div>
-          <div className="py-3 text-muted-foreground px-1 flex items-center gap-2 cursor-not-allowed">
-            Momentum
-            <Badge variant="secondary" className="text-[9px] h-4 px-1 py-0">Coming Soon</Badge>
-          </div>
-          <div className="py-3 text-muted-foreground px-1 flex items-center gap-2 cursor-not-allowed">
-            Quality
-            <Badge variant="secondary" className="text-[9px] h-4 px-1 py-0">Coming Soon</Badge>
-          </div>
-          <div className="py-3 text-muted-foreground px-1 flex items-center gap-2 cursor-not-allowed">
-            Dividend
-            <Badge variant="secondary" className="text-[9px] h-4 px-1 py-0">Coming Soon</Badge>
-          </div>
+
+        {/* ── Tab bar ─────────────────────────────────────────────────── */}
+        <div className="px-6 flex gap-1 text-sm border-t border-border/50 overflow-x-auto scrollbar-none">
+          {TABS.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={[
+                "py-3 px-3 font-medium whitespace-nowrap transition-colors border-b-2",
+                activeTab === tab.id
+                  ? "text-primary border-primary"
+                  : "text-muted-foreground border-transparent hover:text-foreground",
+              ].join(" ")}
+              data-testid={`tab-${tab.id}`}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
       </header>
 
+      {/* ── Main content ────────────────────────────────────────────────── */}
       <main className="flex-1 p-6 flex flex-col gap-6 max-w-[1600px] mx-auto w-full">
-        <div className="bg-primary/10 border border-primary/20 rounded-lg p-5 flex gap-4 items-start shadow-sm">
-          <div className="text-primary font-serif text-4xl leading-none mt-1">"</div>
-          <div>
-            <p className="text-foreground/90 font-medium text-sm leading-relaxed max-w-4xl">
-              At ~16% annual EPS growth, a stock compounds to 100&times; in ~30 years &mdash; at 20%, it takes just 25.
-              The GARP screener surfaces companies on this trajectory &mdash; growing fast enough to be transformative,
-              priced reasonably enough to buy today.
-            </p>
-          </div>
-        </div>
+        {/* GARP */}
+        {activeTab === "garp" && (
+          <>
+            <StrategyBanner quote={GARP_BANNER} />
+            <div className="flex flex-col lg:flex-row gap-8 items-start">
+              <aside className="w-full lg:w-72 shrink-0">
+                <FilterPanel
+                  filters={filters}
+                  setFilters={setFilters}
+                  defaultFilters={defaultFilters}
+                  totalStocks={allStocks.length}
+                  filteredCount={filteredStocks.length}
+                />
+              </aside>
+              <div className="flex-1 min-w-0 w-full">
+                <StockTable stocks={filteredStocks} />
+              </div>
+            </div>
+          </>
+        )}
 
-        <div className="flex flex-col lg:flex-row gap-8 items-start">
-          <aside className="w-full lg:w-72 shrink-0">
-            <FilterPanel
-              filters={filters}
-              setFilters={setFilters}
-              defaultFilters={defaultFilters}
-              totalStocks={allStocks.length}
-              filteredCount={filteredStocks.length}
-            />
-          </aside>
-          <div className="flex-1 min-w-0 w-full">
-            <StockTable stocks={filteredStocks} />
-          </div>
-        </div>
+        {activeTab === "deep-value"  && <DeepValueTab  stocks={allStocks} />}
+        {activeTab === "momentum"    && <MomentumTab   stocks={allStocks} />}
+        {activeTab === "quality"     && <QualityTab    stocks={allStocks} />}
+        {activeTab === "dividend"    && <DividendTab   stocks={allStocks} />}
+        {activeTab === "asymmetric"  && <AsymmetricTab stocks={allStocks} />}
+        {activeTab === "trending"    && <TrendingTab   stocks={allStocks} />}
       </main>
     </div>
   );

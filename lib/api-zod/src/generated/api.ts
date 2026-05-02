@@ -15,37 +15,54 @@ export const HealthCheckResponse = zod.object({
   status: zod.string(),
 });
 
+const stockShape = zod.object({
+  ticker: zod.string(),
+  company: zod.string(),
+  sector: zod.string(),
+  marketCap: zod.enum(["Mega", "Large", "Mid", "Small", "Micro"]),
+  epsGrowth5yr: zod.number().describe("5-year average EPS growth rate (decimal, e.g. 0.15 = 15%)"),
+  consecutiveYearsAbove16: zod.number().describe("Number of consecutive recent years with EPS growth >= 16%"),
+  pegRatio: zod.number(),
+  forwardPE: zod.number(),
+  revenueGrowth3yr: zod.number().describe("3-year average revenue growth rate (decimal)"),
+  roe: zod.number().describe("Return on equity (decimal)"),
+  netMargin: zod.number().describe("Net profit margin (decimal)"),
+  debtToEquity: zod.number(),
+  yearsTo100x: zod.number(),
+  hundredBaggerScore: zod.number(),
+  // Deep Value
+  trailingPE: zod.number(),
+  priceToBook: zod.number(),
+  evToEbitda: zod.number(),
+  fcfYield: zod.number(),
+  // Quality
+  returnOnAssets: zod.number(),
+  grossMargin: zod.number(),
+  operatingMargin: zod.number(),
+  currentRatio: zod.number(),
+  // Dividend Growth
+  dividendYield: zod.number(),
+  dividendRate: zod.number(),
+  payoutRatio: zod.number(),
+  fiveYearAvgDividendYield: zod.number(),
+  // Momentum / Trending / Asymmetric
+  return52w: zod.number(),
+  returnVsSP500: zod.number(),
+  return3m: zod.number(),
+  return1m: zod.number(),
+  pctFromHigh: zod.number(),
+  volumeTrend: zod.number(),
+  // Asymmetric
+  shortPercentOfFloat: zod.number(),
+  analystRating: zod.number(),
+});
+
 /**
  * Returns list of stocks with fundamental metrics for screening
  * @summary Get screener stocks
  */
 export const GetStocksResponse = zod.object({
-  stocks: zod.array(
-    zod.object({
-      ticker: zod.string(),
-      company: zod.string(),
-      sector: zod.string(),
-      marketCap: zod.enum(["Mega", "Large", "Mid", "Small", "Micro"]),
-      epsGrowth5yr: zod
-        .number()
-        .describe("5-year average EPS growth rate (decimal, e.g. 0.15 = 15%)"),
-      consecutiveYearsAbove16: zod
-        .number()
-        .describe("Number of consecutive recent years with EPS growth >= 16%"),
-      pegRatio: zod.number(),
-      forwardPE: zod.number(),
-      revenueGrowth3yr: zod
-        .number()
-        .describe("3-year average revenue growth rate (decimal)"),
-      roe: zod.number().describe("Return on equity (decimal)"),
-      netMargin: zod.number().describe("Net profit margin (decimal)"),
-      debtToEquity: zod.number(),
-      yearsTo100x: zod.number(),
-      hundredBaggerScore: zod.number(),
-    }),
-  ),
-  cachedAt: zod
-    .string()
-    .describe("ISO timestamp of when the data was last fetched"),
+  stocks: zod.array(stockShape),
+  cachedAt: zod.string().describe("ISO timestamp of when the data was last fetched"),
   source: zod.string().describe("Data source identifier"),
 });
