@@ -69,7 +69,8 @@ export function StockTable({ stocks }: StockTableProps) {
           <TableHeader className="bg-muted/50 whitespace-nowrap">
             <TableRow>
               <TableHead className="w-12 text-right cursor-pointer" onClick={() => requestSort("rank")}># {getSortIcon("rank")}</TableHead>
-              <TableHead className="cursor-pointer min-w-[150px]" onClick={() => requestSort("ticker")}>Company {getSortIcon("ticker")}</TableHead>
+              <TableHead className="cursor-pointer w-20" onClick={() => requestSort("ticker")}>Ticker {getSortIcon("ticker")}</TableHead>
+              <TableHead className="cursor-pointer min-w-[150px]" onClick={() => requestSort("company")}>Company {getSortIcon("company")}</TableHead>
               <TableHead className="cursor-pointer" onClick={() => requestSort("sector")}>Sector {getSortIcon("sector")}</TableHead>
               <TableHead className="cursor-pointer" onClick={() => requestSort("marketCap")}>Cap {getSortIcon("marketCap")}</TableHead>
               <TableHead className="text-right cursor-pointer" onClick={() => requestSort("epsGrowth5yr")}>EPS Growth {getSortIcon("epsGrowth5yr")}</TableHead>
@@ -91,10 +92,8 @@ export function StockTable({ stocks }: StockTableProps) {
             {sortedStocks.map((stock) => (
               <TableRow key={stock.ticker} className="hover:bg-muted/30 transition-colors">
                 <TableCell className="text-right text-muted-foreground font-mono text-xs">{stock.rank}</TableCell>
-                <TableCell>
-                  <div className="font-bold text-foreground">{stock.ticker}</div>
-                  <div className="text-xs text-muted-foreground truncate max-w-[150px]">{stock.company}</div>
-                </TableCell>
+                <TableCell className="font-bold text-foreground font-mono">{stock.ticker}</TableCell>
+                <TableCell className="text-sm text-muted-foreground truncate max-w-[150px]">{stock.company}</TableCell>
                 <TableCell>
                   <Badge variant="outline" className="text-[10px] font-normal whitespace-nowrap bg-muted/20">{stock.sector}</Badge>
                 </TableCell>
