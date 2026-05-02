@@ -48,6 +48,7 @@ export function calculateMetrics(stock: Omit<Stock, "yearsTo100x" | "hundredBagg
 
 export interface FilterState {
   epsGrowth: number;
+  pegMin: number;
   pegMax: number;
   fwdPeMin: number;
   fwdPeMax: number;
@@ -61,6 +62,7 @@ export interface FilterState {
 
 export const defaultFilters: FilterState = {
   epsGrowth: 15,
+  pegMin: 0,
   pegMax: 2.0,
   fwdPeMin: 10,
   fwdPeMax: 40,
@@ -75,7 +77,7 @@ export const defaultFilters: FilterState = {
 export function filterStocks(stocks: Stock[], filters: FilterState): Stock[] {
   return stocks.filter(s => {
     if (s.epsGrowth5yr * 100 < filters.epsGrowth) return false;
-    if (s.pegRatio > filters.pegMax) return false;
+    if (s.pegRatio < filters.pegMin || s.pegRatio > filters.pegMax) return false;
     if (s.forwardPE < filters.fwdPeMin || s.forwardPE > filters.fwdPeMax) return false;
     if (s.revenueGrowth3yr * 100 < filters.revGrowth) return false;
     if (s.roe * 100 < filters.roeMin) return false;

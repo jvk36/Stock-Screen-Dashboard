@@ -52,7 +52,7 @@ export default function Dashboard() {
           <div className="text-primary font-serif text-4xl leading-none mt-1">"</div>
           <div>
             <p className="text-foreground/90 font-medium text-sm leading-relaxed max-w-4xl">
-              At ~16% annual EPS growth, a stock compounds to 100&times; in ~30 years. 
+              At ~16% annual EPS growth, a stock compounds to 100&times; in ~30 years &mdash; at 20%, it takes just 25.
               The GARP screener surfaces companies on this trajectory &mdash; growing fast enough to be transformative, 
               priced reasonably enough to buy today.
             </p>

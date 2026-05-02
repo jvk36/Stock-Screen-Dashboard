@@ -52,8 +52,7 @@ export function FilterPanel({ filters, setFilters, defaultFilters, totalStocks, 
 
   const toggleAllSectors = () => {
     if (filters.sectors.length === 0) {
-      // currently all selected (empty array), so unselect all by filling with nothing (wait, if empty is all, then we set it to some dummy? No, let's say length === allSectors.length or 0 means all)
-      setFilters({ ...filters, sectors: ["None"] }); // A bit hacky, but empty means all
+      setFilters({ ...filters, sectors: [...allSectors] });
     } else {
       setFilters({ ...filters, sectors: [] });
     }
@@ -94,14 +93,14 @@ export function FilterPanel({ filters, setFilters, defaultFilters, totalStocks, 
         {/* PEG Ratio */}
         <div className="space-y-3">
           <div className="flex justify-between items-center">
-            <Label>PEG Ratio (Max)</Label>
-            <span className="text-sm font-medium text-foreground">&le; {filters.pegMax.toFixed(1)}</span>
+            <Label>PEG Ratio</Label>
+            <span className="text-sm font-medium text-foreground">{filters.pegMin.toFixed(1)} &ndash; {filters.pegMax.toFixed(1)}</span>
           </div>
           <Slider
-            value={[filters.pegMax]}
+            value={[filters.pegMin, filters.pegMax]}
             min={0} max={4} step={0.1}
-            onValueChange={([v]) => setFilters({ ...filters, pegMax: v })}
-            data-testid="slider-peg-max"
+            onValueChange={([min, max]) => setFilters({ ...filters, pegMin: min, pegMax: max })}
+            data-testid="slider-peg-range"
           />
         </div>
 

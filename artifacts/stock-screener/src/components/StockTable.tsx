@@ -3,7 +3,7 @@ import { Stock } from "../lib/screener";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { ArrowDown, ArrowUp, Flame, Hourglass } from "lucide-react";
+import { ArrowDown, ArrowUp, Hourglass } from "lucide-react";
 
 interface StockTableProps {
   stocks: Stock[];
@@ -84,7 +84,7 @@ export function StockTable({ stocks }: StockTableProps) {
                 Yrs to 100x {getSortIcon("yearsTo100x")}
               </TableHead>
               <TableHead className="cursor-pointer w-24" onClick={() => requestSort("hundredBaggerScore")}>Score {getSortIcon("hundredBaggerScore")}</TableHead>
-              <TableHead className="w-12 text-center" title="Compounder (5+ yrs >16% EPS growth)"></TableHead>
+              <TableHead className="text-center min-w-[100px]">Compounder</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -125,11 +125,11 @@ export function StockTable({ stocks }: StockTableProps) {
                     <span className="text-xs font-mono text-muted-foreground w-6 text-right">{stock.hundredBaggerScore}</span>
                   </div>
                 </TableCell>
-                <TableCell className="text-center">
+                <TableCell className="text-center" data-testid={`compounder-${stock.ticker}`}>
                   {stock.consecutiveYearsAbove16 >= 5 && (
-                    <div title="Compounder: 5+ years of >16% EPS growth" className="flex justify-center">
-                      <Flame className="w-4 h-4 text-orange-500 fill-orange-500/20" />
-                    </div>
+                    <Badge className="bg-orange-500/15 text-orange-400 border border-orange-500/30 hover:bg-orange-500/20 text-[10px] font-semibold tracking-wide px-2 py-0.5 whitespace-nowrap" title={`${stock.consecutiveYearsAbove16} consecutive years above 16% EPS growth`}>
+                      Compounder
+                    </Badge>
                   )}
                 </TableCell>
               </TableRow>

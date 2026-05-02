@@ -9,7 +9,7 @@ const raw: RawStock[] = [
   { ticker: "CLUD", company: "Cloudspan Systems", sector: "Information Technology", marketCap: "Large", epsGrowth5yr: 0.24, consecutiveYearsAbove16: 6, pegRatio: 1.38, forwardPE: 33.1, revenueGrowth3yr: 0.22, roe: 0.31, netMargin: 0.18, debtToEquity: 0.35 },
   { ticker: "MKTP", company: "Marketpath Technologies", sector: "Information Technology", marketCap: "Mid", epsGrowth5yr: 0.21, consecutiveYearsAbove16: 5, pegRatio: 1.51, forwardPE: 31.7, revenueGrowth3yr: 0.19, roe: 0.27, netMargin: 0.15, debtToEquity: 0.42 },
   { ticker: "BRIX", company: "Brixon Platforms", sector: "Information Technology", marketCap: "Mid", epsGrowth5yr: 0.19, consecutiveYearsAbove16: 5, pegRatio: 1.67, forwardPE: 31.7, revenueGrowth3yr: 0.17, roe: 0.24, netMargin: 0.13, debtToEquity: 0.61 },
-  { ticker: "SGNL", company: "Signal Analytics Corp", sector: "Information Technology", marketCap: "Mid", epsGrowth5yr: 0.22, consecutiveYearsAbove16: 6, pegRatio: 1.29, forwardPE: 28.4, revenueGrowth3yr: 0.20, roe: 0.33, netMargin: 0.19, deutToEquity: 0.28 } as unknown as RawStock,
+  { ticker: "SGNL", company: "Signal Analytics Corp", sector: "Information Technology", marketCap: "Mid", epsGrowth5yr: 0.22, consecutiveYearsAbove16: 6, pegRatio: 1.29, forwardPE: 28.4, revenueGrowth3yr: 0.20, roe: 0.33, netMargin: 0.19, debtToEquity: 0.28 },
   { ticker: "AXON", company: "Axon Data Sciences", sector: "Information Technology", marketCap: "Large", epsGrowth5yr: 0.18, consecutiveYearsAbove16: 4, pegRatio: 1.72, forwardPE: 31.0, revenueGrowth3yr: 0.16, roe: 0.23, netMargin: 0.14, debtToEquity: 0.55 },
   { ticker: "PLYN", company: "Polyline Networks", sector: "Information Technology", marketCap: "Small", epsGrowth5yr: 0.26, consecutiveYearsAbove16: 7, pegRatio: 0.98, forwardPE: 25.5, revenueGrowth3yr: 0.24, roe: 0.38, netMargin: 0.21, debtToEquity: 0.22 },
   { ticker: "HEXA", company: "Hexadyne Software", sector: "Information Technology", marketCap: "Mega", epsGrowth5yr: 0.17, consecutiveYearsAbove16: 3, pegRatio: 1.94, forwardPE: 33.0, revenueGrowth3yr: 0.15, roe: 0.22, netMargin: 0.17, debtToEquity: 0.30 },
@@ -31,7 +31,7 @@ const raw: RawStock[] = [
   { ticker: "MLTA", company: "Multa Materials", sector: "Materials", marketCap: "Mid", epsGrowth5yr: 0.17, consecutiveYearsAbove16: 3, pegRatio: 1.76, forwardPE: 29.9, revenueGrowth3yr: 0.14, roe: 0.22, netMargin: 0.11, debtToEquity: 0.72 },
   { ticker: "RNWX", company: "Renewex Power", sector: "Utilities", marketCap: "Large", epsGrowth5yr: 0.15, consecutiveYearsAbove16: 2, pegRatio: 1.99, forwardPE: 29.8, revenueGrowth3yr: 0.12, roe: 0.17, netMargin: 0.10, debtToEquity: 1.30 },
 
-  // ── NEAR-GARP TIER: epsGrowth 0.10–0.149, some quality metrics okay ─────────
+  // ── NEAR-GARP TIER: epsGrowth 0.10–0.149 ────────────────────────────────────
   { ticker: "CRST", company: "Crestview Software", sector: "Information Technology", marketCap: "Large", epsGrowth5yr: 0.14, consecutiveYearsAbove16: 1, pegRatio: 2.10, forwardPE: 29.4, revenueGrowth3yr: 0.12, roe: 0.20, netMargin: 0.13, debtToEquity: 0.60 },
   { ticker: "PRXM", company: "Proxima Networks", sector: "Information Technology", marketCap: "Mid", epsGrowth5yr: 0.13, consecutiveYearsAbove16: 1, pegRatio: 2.23, forwardPE: 29.0, revenueGrowth3yr: 0.11, roe: 0.18, netMargin: 0.12, debtToEquity: 0.70 },
   { ticker: "DLTX", company: "Deltex Cloud", sector: "Information Technology", marketCap: "Mid", epsGrowth5yr: 0.12, consecutiveYearsAbove16: 0, pegRatio: 2.41, forwardPE: 28.9, revenueGrowth3yr: 0.10, roe: 0.17, netMargin: 0.11, debtToEquity: 0.85 },
@@ -88,8 +88,5 @@ const raw: RawStock[] = [
   { ticker: "WTRK", company: "Watermark Financial", sector: "Financials", marketCap: "Mid", epsGrowth5yr: 0.08, consecutiveYearsAbove16: 0, pegRatio: 3.00, forwardPE: 24.0, revenueGrowth3yr: 0.06, roe: 0.11, netMargin: 0.19, debtToEquity: 1.05 },
   { ticker: "BNCR", company: "Bancroft Trust", sector: "Financials", marketCap: "Large", epsGrowth5yr: 0.06, consecutiveYearsAbove16: 0, pegRatio: 3.33, forwardPE: 20.0, revenueGrowth3yr: 0.04, roe: 0.09, netMargin: 0.16, debtToEquity: 1.30 },
 ];
-
-// Patch the one typo from the spread (SGNL had a typo key)
-raw[4] = { ticker: "SGNL", company: "Signal Analytics Corp", sector: "Information Technology", marketCap: "Mid", epsGrowth5yr: 0.22, consecutiveYearsAbove16: 6, pegRatio: 1.29, forwardPE: 28.4, revenueGrowth3yr: 0.20, roe: 0.33, netMargin: 0.19, debtToEquity: 0.28 };
 
 export const mockStocks = raw.map(calculateMetrics);
