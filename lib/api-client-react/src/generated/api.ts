@@ -13,7 +13,7 @@ import type {
   UseQueryResult,
 } from "@tanstack/react-query";
 
-import type { HealthStatus } from "./api.schemas";
+import type { ApiError, GetStocks200, HealthStatus } from "./api.schemas";
 
 import { customFetch } from "../custom-fetch";
 import type { ErrorType } from "../custom-fetch";
@@ -92,6 +92,74 @@ export function useHealthCheck<
   request?: SecondParameter<typeof customFetch>;
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getHealthCheckQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Returns list of stocks with fundamental metrics for screening
+ * @summary Get screener stocks
+ */
+export const getGetStocksUrl = () => {
+  return `/api/stocks`;
+};
+
+export const getStocks = async (
+  options?: RequestInit,
+): Promise<GetStocks200> => {
+  return customFetch<GetStocks200>(getGetStocksUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetStocksQueryKey = () => {
+  return [`/api/stocks`] as const;
+};
+
+export const getGetStocksQueryOptions = <
+  TData = Awaited<ReturnType<typeof getStocks>>,
+  TError = ErrorType<ApiError>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof getStocks>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetStocksQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getStocks>>> = ({
+    signal,
+  }) => getStocks({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getStocks>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetStocksQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getStocks>>
+>;
+export type GetStocksQueryError = ErrorType<ApiError>;
+
+/**
+ * @summary Get screener stocks
+ */
+
+export function useGetStocks<
+  TData = Awaited<ReturnType<typeof getStocks>>,
+  TError = ErrorType<ApiError>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof getStocks>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetStocksQueryOptions(options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;

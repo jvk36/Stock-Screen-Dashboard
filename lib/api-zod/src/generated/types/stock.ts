@@ -5,20 +5,7 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-export interface HealthStatus {
-  status: string;
-}
-
-export type StockMarketCap =
-  (typeof StockMarketCap)[keyof typeof StockMarketCap];
-
-export const StockMarketCap = {
-  Mega: "Mega",
-  Large: "Large",
-  Mid: "Mid",
-  Small: "Small",
-  Micro: "Micro",
-} as const;
+import type { StockMarketCap } from "./stockMarketCap";
 
 export interface Stock {
   ticker: string;
@@ -41,16 +28,3 @@ export interface Stock {
   yearsTo100x: number;
   hundredBaggerScore: number;
 }
-
-export interface ApiError {
-  error: string;
-  message: string;
-}
-
-export type GetStocks200 = {
-  stocks: Stock[];
-  /** ISO timestamp of when the data was last fetched */
-  cachedAt: string;
-  /** Data source identifier */
-  source: string;
-};
