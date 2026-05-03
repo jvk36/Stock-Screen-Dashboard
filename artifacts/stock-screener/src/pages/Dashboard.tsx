@@ -4,8 +4,9 @@ import { StockTable } from "@/components/StockTable";
 import { StrategyBanner } from "@/components/StrategyBanner";
 import { PrimaryDriverBadge } from "@/components/PrimaryDriverBadge";
 import { defaultFilters, filterStocks, buildStrategyRankings } from "@/lib/screener";
-import type { Stock, StrategyStocks } from "@/lib/screener";
+import type { Stock } from "@/lib/screener";
 import { useGetStockStrategies, getGetStockStrategiesQueryKey } from "@workspace/api-client-react";
+import type { StockStrategies } from "@workspace/api-client-react";
 import { mockStocks } from "@/data/mockStocks";
 import { DeepValueTab } from "@/pages/tabs/DeepValueTab";
 import { MomentumTab } from "@/pages/tabs/MomentumTab";
@@ -58,7 +59,7 @@ export default function Dashboard() {
     }
     if (data !== undefined) {
       return {
-        strategies: data.strategies as unknown as StrategyStocks,
+        strategies: data.strategies,
         dataMode: "live" as DataMode,
         errorKind: null,
         cachedAt: data.cachedAt,
