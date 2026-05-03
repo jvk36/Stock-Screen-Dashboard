@@ -93,48 +93,85 @@ export function calculateMetrics(
  * Mirrors the server-side `buildStrategies` logic for fallback use with mock data.
  */
 export function buildStrategyRankings(stocks: Stock[]): StrategyStocks {
-  // GARP — Earnings Growth minus P/E spread: epsGrowth5yr - (1/forwardPE), descending
-  const garp = [...stocks].sort((a, b) => {
-    const aScore = a.epsGrowth5yr - (a.forwardPE > 0 ? 1 / a.forwardPE : 0);
-    const bScore = b.epsGrowth5yr - (b.forwardPE > 0 ? 1 / b.forwardPE : 0);
-    return bScore - aScore;
-  });
+  // GARP — Growth At Reasonable Price
+  const garp = stocks
+    .filter(
+      (s) =>
+        s.epsGrowth5yr >= 0.12 &&
+        s.forwardPE > 0 && s.forwardPE <= 50 &&
+        s.pegRatio > 0 && s.pegRatio <= 3 &&
+        s.revenueGrowth3yr >= 0.08
+    )
+    .sort((a, b) => {
+      const aScore = a.epsGrowth5yr - (a.forwardPE > 0 ? 1 / a.forwardPE : 0);
+      const bScore = b.epsGrowth5yr - (b.forwardPE > 0 ? 1 / b.forwardPE : 0);
+      return bScore - aScore;
+    });
 
-  // Deep Value — Low P/B: priceToBook ascending (0 = no data, pushed to end)
-  const deepValue = [...stocks].sort((a, b) => {
-    if (a.priceToBook <= 0 && b.priceToBook <= 0) return 0;
-    if (a.priceToBook <= 0) return 1;
-    if (b.priceToBook <= 0) return -1;
-    return a.priceToBook - b.priceToBook;
-  });
+  // Deep Value — Cheap by book value, enterprise value, or free cash flow
+  const deepValue = stocks
+    .filter(
+      (s) =>
+        (s.priceToBook > 0 && s.priceToBook <= 2.5) ||
+        (s.evToEbitda > 0 && s.evToEbitda <= 12) ||
+        s.fcfYield >= 0.05
+    )
+    .sort((a, b) => {
+      if (a.priceToBook <= 0 && b.priceToBook <= 0) return 0;
+      if (a.priceToBook <= 0) return 1;
+      if (b.priceToBook <= 0) return -1;
+      return a.priceToBook - b.priceToBook;
+    });
 
-  // Momentum — Relative Strength vs S&P 500: returnVsSP500, descending
-  const momentum = [...stocks].sort((a, b) => b.returnVsSP500 - a.returnVsSP500);
+  // Momentum — Outperforming the market with confirmation
+  const momentum = stocks
+    .filter((s) => s.returnVsSP500 > 0 && s.return3m > 0)
+    .sort((a, b) => b.returnVsSP500 - a.returnVsSP500);
 
-  // Quality — High Moat: ROE, descending
-  const quality = [...stocks].sort((a, b) => b.roe - a.roe);
+  // Quality — High-moat durable businesses
+  const quality = stocks
+    .filter(
+      (s) =>
+        s.roe >= 0.15 &&
+        s.grossMargin >= 0.30 &&
+        s.debtToEquity <= 2.0
+    )
+    .sort((a, b) => b.roe - a.roe);
 
-  // Dividend Growth — Yield/Safety: dividendYield × (1 − payoutRatio), descending
-  const dividendGrowth = [...stocks]
-    .filter((s) => s.dividendYield > 0)
+  // Dividend Growth — Sustainable yield with earnings support
+  const dividendGrowth = stocks
+    .filter(
+      (s) =>
+        s.dividendYield > 0 &&
+        s.payoutRatio <= 0.80 &&
+        s.epsGrowth5yr >= 0
+    )
     .sort((a, b) => {
       const aScore = a.dividendYield * (1 - Math.min(a.payoutRatio, 1));
       const bScore = b.dividendYield * (1 - Math.min(b.payoutRatio, 1));
       return bScore - aScore;
     });
 
-  // Asymmetric — deep discount + analyst conviction
-  const asymmetric = [...stocks].sort((a, b) => {
-    const aNorm = a.analystRating > 0 ? (5 - a.analystRating) / 4 : 0.5;
-    const bNorm = b.analystRating > 0 ? (5 - b.analystRating) / 4 : 0.5;
-    return (
-      b.pctFromHigh * (0.6 + 0.4 * bNorm) -
-      a.pctFromHigh * (0.6 + 0.4 * aNorm)
-    );
-  });
+  // Asymmetric — Deep discount with analyst conviction as catalyst signal
+  const asymmetric = stocks
+    .filter(
+      (s) =>
+        s.pctFromHigh >= 0.15 &&
+        (s.analystRating === 0 || s.analystRating <= 2.5)
+    )
+    .sort((a, b) => {
+      const aNorm = a.analystRating > 0 ? (5 - a.analystRating) / 4 : 0.5;
+      const bNorm = b.analystRating > 0 ? (5 - b.analystRating) / 4 : 0.5;
+      return (
+        b.pctFromHigh * (0.6 + 0.4 * bNorm) -
+        a.pctFromHigh * (0.6 + 0.4 * aNorm)
+      );
+    });
 
-  // Trending — Immediate Heat: 1-month return, descending
-  const trending = [...stocks].sort((a, b) => b.return1m - a.return1m);
+  // Trending — Recent heat: positive short-term momentum with volume confirmation
+  const trending = stocks
+    .filter((s) => s.return1m > 0 && s.return3m > 0 && s.volumeTrend > 1.0)
+    .sort((a, b) => b.return1m - a.return1m);
 
   return { garp, deepValue, momentum, quality, dividendGrowth, asymmetric, trending };
 }
