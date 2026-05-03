@@ -19,16 +19,30 @@ export interface ColumnDef {
   render: (stock: ScoredStock & { rank: number }) => ReactNode;
 }
 
+type SortConfig = { key: string; direction: "asc" | "desc" };
+
 interface TabStockTableProps {
   stocks: ScoredStock[];
   columns: ColumnDef[];
-  defaultSort: { key: string; direction: "asc" | "desc" };
+  /**
+   * Initial sort column.
+   * Pass `null` to preserve the incoming order (server's primary-driver order).
+   * The user can still click any column header to sort interactively.
+   */
+  defaultSort: SortConfig | null;
 }
 
 export function TabStockTable({ stocks, columns, defaultSort }: TabStockTableProps) {
-  const [sortConfig, setSortConfig] = useState(defaultSort);
+  const [sortConfig, setSortConfig] = useState<SortConfig | null>(defaultSort);
 
   const rankedAndSorted = useMemo(() => {
+    if (!sortConfig) {
+      // No client-side sort: preserve incoming order = server's primary-driver ranking.
+      // Rank 1 = best by primary driver (position 0 in the pre-ranked array).
+      return stocks.map((s, i) => ({ ...s, rank: i + 1 }));
+    }
+
+    // When the user picks a sort column, rank by score first, then re-order by chosen key.
     const ranked = [...stocks]
       .sort((a, b) => b.score - a.score)
       .map((s, i) => ({ ...s, rank: i + 1 }));
@@ -50,12 +64,12 @@ export function TabStockTable({ stocks, columns, defaultSort }: TabStockTablePro
     if (!key) return;
     setSortConfig((prev) => ({
       key,
-      direction: prev.key === key && prev.direction === "desc" ? "asc" : "desc",
+      direction: prev?.key === key && prev.direction === "desc" ? "asc" : "desc",
     }));
   };
 
   const getSortIcon = (key: string | undefined) => {
-    if (!key || sortConfig.key !== key) return null;
+    if (!key || !sortConfig || sortConfig.key !== key) return null;
     return sortConfig.direction === "asc" ? (
       <ArrowUp className="w-3 h-3 inline ml-1" />
     ) : (

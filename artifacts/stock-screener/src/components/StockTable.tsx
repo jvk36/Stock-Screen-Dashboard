@@ -15,38 +15,37 @@ type SortConfig = {
 };
 
 export function StockTable({ stocks }: StockTableProps) {
-  // Default sort: highest EPS growth first — the dominant component of the GARP
-  // primary driver (epsGrowth5yr − 1/forwardPE), preserving the server-side ordering.
-  const [sortConfig, setSortConfig] = useState<SortConfig>({ key: "epsGrowth5yr", direction: "desc" });
+  // null = preserve server primary-driver order (epsGrowth5yr − 1/forwardPE, pre-ranked by server).
+  // Users can still click any column header to sort interactively.
+  const [sortConfig, setSortConfig] = useState<SortConfig | null>(null);
 
   const sortedStocks = useMemo(() => {
-    // Pre-calculate ranks based on EPS growth (matches primary driver ordering)
-    const rankedItems = [...stocks].sort((a, b) => b.epsGrowth5yr - a.epsGrowth5yr).map((s, i) => ({ ...s, rank: i + 1 }));
+    // Assign ranks based on incoming array position = server's GARP primary-driver rank.
+    const rankedItems = stocks.map((s, i) => ({ ...s, rank: i + 1 }));
 
-    if (sortConfig !== null) {
-      rankedItems.sort((a, b) => {
-        if (a[sortConfig.key] < b[sortConfig.key]) {
-          return sortConfig.direction === "asc" ? -1 : 1;
-        }
-        if (a[sortConfig.key] > b[sortConfig.key]) {
-          return sortConfig.direction === "asc" ? 1 : -1;
-        }
-        return 0;
-      });
-    }
+    if (!sortConfig) return rankedItems; // preserve server order
+
+    rankedItems.sort((a, b) => {
+      if (a[sortConfig.key] < b[sortConfig.key]) {
+        return sortConfig.direction === "asc" ? -1 : 1;
+      }
+      if (a[sortConfig.key] > b[sortConfig.key]) {
+        return sortConfig.direction === "asc" ? 1 : -1;
+      }
+      return 0;
+    });
     return rankedItems;
   }, [stocks, sortConfig]);
 
   const requestSort = (key: keyof Stock | "rank") => {
-    let direction: "asc" | "desc" = "desc";
-    if (sortConfig.key === key && sortConfig.direction === "desc") {
-      direction = "asc";
-    }
-    setSortConfig({ key, direction });
+    setSortConfig((prev) => ({
+      key,
+      direction: prev?.key === key && prev.direction === "desc" ? "asc" : "desc",
+    }));
   };
 
   const getSortIcon = (key: keyof Stock | "rank") => {
-    if (sortConfig.key !== key) return null;
+    if (!sortConfig || sortConfig.key !== key) return null;
     return sortConfig.direction === "asc" ? <ArrowUp className="w-3 h-3 inline ml-1" /> : <ArrowDown className="w-3 h-3 inline ml-1" />;
   };
 
