@@ -81,3 +81,28 @@ export type GetStocks200 = {
   /** Data source identifier */
   source: string;
 };
+
+export interface StockStrategies {
+  /** Stocks ranked by GARP primary driver: EPS growth − (1 / forward P/E), descending */
+  garp: Stock[];
+  /** Stocks ranked by Deep Value primary driver: Price-to-Book, ascending */
+  deepValue: Stock[];
+  /** Stocks ranked by Momentum primary driver: Return vs S&P 500, descending */
+  momentum: Stock[];
+  /** Stocks ranked by Quality primary driver: ROE, descending */
+  quality: Stock[];
+  /** Dividend-paying stocks ranked by Yield/Safety: dividendYield × (1 − payoutRatio), descending */
+  dividendGrowth: Stock[];
+  /** Stocks ranked by Asymmetric primary driver: discount from high × analyst conviction, descending */
+  asymmetric: Stock[];
+  /** Stocks ranked by Trending primary driver: 1-month return, descending */
+  trending: Stock[];
+}
+
+export type GetStockStrategies200 = {
+  strategies: StockStrategies;
+  /** ISO timestamp of when the data was last fetched */
+  cachedAt: string;
+  /** Data source identifier */
+  source: string;
+};

@@ -13,7 +13,7 @@ import type {
   UseQueryResult,
 } from "@tanstack/react-query";
 
-import type { ApiError, GetStocks200, HealthStatus } from "./api.schemas";
+import type { ApiError, GetStocks200, GetStockStrategies200, HealthStatus } from "./api.schemas";
 
 import { customFetch } from "../custom-fetch";
 import type { ErrorType } from "../custom-fetch";
@@ -160,6 +160,82 @@ export function useGetStocks<
   request?: SecondParameter<typeof customFetch>;
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getGetStocksQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Returns per-strategy pre-ranked stock lists, each ordered by its Primary Driver metric
+ * @summary Get per-strategy ranked stock lists
+ */
+export const getGetStockStrategiesUrl = () => {
+  return `/api/stocks/strategies`;
+};
+
+export const getStockStrategies = async (
+  options?: RequestInit,
+): Promise<GetStockStrategies200> => {
+  return customFetch<GetStockStrategies200>(getGetStockStrategiesUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetStockStrategiesQueryKey = () => {
+  return [`/api/stocks/strategies`] as const;
+};
+
+export const getGetStockStrategiesQueryOptions = <
+  TData = Awaited<ReturnType<typeof getStockStrategies>>,
+  TError = ErrorType<ApiError>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getStockStrategies>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetStockStrategiesQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getStockStrategies>>
+  > = ({ signal }) => getStockStrategies({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getStockStrategies>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetStockStrategiesQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getStockStrategies>>
+>;
+export type GetStockStrategiesQueryError = ErrorType<ApiError>;
+
+/**
+ * @summary Get per-strategy ranked stock lists
+ */
+
+export function useGetStockStrategies<
+  TData = Awaited<ReturnType<typeof getStockStrategies>>,
+  TError = ErrorType<ApiError>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getStockStrategies>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetStockStrategiesQueryOptions(options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;

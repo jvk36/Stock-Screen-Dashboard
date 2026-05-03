@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import type { Stock, ScoredStock } from "@/lib/screener";
 import { filterTrending, defaultTrendingFilters } from "@/lib/screener";
 import { StrategyBanner } from "@/components/StrategyBanner";
+import { PrimaryDriverBadge } from "@/components/PrimaryDriverBadge";
 import { TabFilterPanel, type FilterControl } from "@/components/TabFilterPanel";
 import { TabStockTable, type ColumnDef } from "@/components/TabStockTable";
 import { Badge } from "@/components/ui/badge";
@@ -46,18 +47,18 @@ const COLUMNS: ColumnDef[] = [
     render: (s) => <span className="text-xs text-muted-foreground">{s.marketCap}</span>,
   },
   {
-    key: "return3m", header: "3m Ret", align: "right", sortKey: "return3m",
-    render: (s) => (
-      <span className={`font-mono text-sm ${pctColor(s.return3m)}`}>
-        {s.return3m !== 0 ? `${s.return3m > 0 ? "+" : ""}${(s.return3m * 100).toFixed(1)}%` : "—"}
-      </span>
-    ),
-  },
-  {
     key: "return1m", header: "1m Ret", align: "right", sortKey: "return1m",
     render: (s) => (
       <span className={`font-mono text-sm ${pctColor(s.return1m)}`}>
         {s.return1m !== 0 ? `${s.return1m > 0 ? "+" : ""}${(s.return1m * 100).toFixed(1)}%` : "—"}
+      </span>
+    ),
+  },
+  {
+    key: "return3m", header: "3m Ret", align: "right", sortKey: "return3m",
+    render: (s) => (
+      <span className={`font-mono text-sm ${pctColor(s.return3m)}`}>
+        {s.return3m !== 0 ? `${s.return3m > 0 ? "+" : ""}${(s.return3m * 100).toFixed(1)}%` : "—"}
       </span>
     ),
   },
@@ -107,6 +108,10 @@ export function TrendingTab({ stocks }: { stocks: Stock[] }) {
   return (
     <div className="flex flex-col gap-6">
       <StrategyBanner quote={BANNER} />
+      <PrimaryDriverBadge
+        driver="1-Month Return"
+        description="Immediate heat — strongest price momentum over the past month"
+      />
       <div className="flex flex-col lg:flex-row gap-8 items-start">
         <aside className="w-full lg:w-72 shrink-0">
           <TabFilterPanel
@@ -122,7 +127,7 @@ export function TrendingTab({ stocks }: { stocks: Stock[] }) {
           <TabStockTable
             stocks={filteredStocks}
             columns={COLUMNS}
-            defaultSort={{ key: "return3m", direction: "desc" }}
+            defaultSort={{ key: "return1m", direction: "desc" }}
           />
         </div>
       </div>

@@ -63,6 +63,16 @@ interface StockData {
   price: number;
 }
 
+export interface StockStrategies {
+  garp: StockData[];
+  deepValue: StockData[];
+  momentum: StockData[];
+  quality: StockData[];
+  dividendGrowth: StockData[];
+  asymmetric: StockData[];
+  trending: StockData[];
+}
+
 function round2(n: number) {
   return Math.round(n * 100) / 100;
 }
@@ -104,6 +114,61 @@ function calculateMetrics(
   };
 }
 
+/**
+ * Build seven strategy-specific sorted lists from the full stock universe.
+ * Each list is ranked by that strategy's Primary Driver metric.
+ */
+function buildStrategies(stocks: StockData[]): StockStrategies {
+  // GARP — Earnings Growth minus P/E spread: epsGrowth5yr - (1 / forwardPE) descending
+  const garp = [...stocks].sort((a, b) => {
+    const aScore = a.epsGrowth5yr - (a.forwardPE > 0 ? 1 / a.forwardPE : 0);
+    const bScore = b.epsGrowth5yr - (b.forwardPE > 0 ? 1 / b.forwardPE : 0);
+    return bScore - aScore;
+  });
+
+  // Deep Value — Low P/B: priceToBook ascending (0 = no data, pushed to end)
+  const deepValue = [...stocks].sort((a, b) => {
+    if (a.priceToBook <= 0 && b.priceToBook <= 0) return 0;
+    if (a.priceToBook <= 0) return 1;
+    if (b.priceToBook <= 0) return -1;
+    return a.priceToBook - b.priceToBook;
+  });
+
+  // Momentum — Relative Strength vs S&P 500: returnVsSP500 descending
+  const momentum = [...stocks].sort(
+    (a, b) => b.returnVsSP500 - a.returnVsSP500
+  );
+
+  // Quality — High Moat: ROE descending
+  const quality = [...stocks].sort((a, b) => b.roe - a.roe);
+
+  // Dividend Growth — Yield/Safety: dividendYield × (1 - payoutRatio) descending
+  // Only include dividend-paying stocks
+  const dividendGrowth = [...stocks]
+    .filter((s) => s.dividendYield > 0)
+    .sort((a, b) => {
+      const aScore = a.dividendYield * (1 - Math.min(a.payoutRatio, 1));
+      const bScore = b.dividendYield * (1 - Math.min(b.payoutRatio, 1));
+      return bScore - aScore;
+    });
+
+  // Asymmetric — LEAPs/Catalysts: deep discount + analyst conviction
+  // pctFromHigh weighted by analyst conviction (lower analystRating = stronger buy)
+  const asymmetric = [...stocks].sort((a, b) => {
+    const aNorm = a.analystRating > 0 ? (5 - a.analystRating) / 4 : 0.5;
+    const bNorm = b.analystRating > 0 ? (5 - b.analystRating) / 4 : 0.5;
+    return (
+      b.pctFromHigh * (0.6 + 0.4 * bNorm) -
+      a.pctFromHigh * (0.6 + 0.4 * aNorm)
+    );
+  });
+
+  // Trending — Immediate Heat: 1-month price momentum descending
+  const trending = [...stocks].sort((a, b) => b.return1m - a.return1m);
+
+  return { garp, deepValue, momentum, quality, dividendGrowth, asymmetric, trending };
+}
+
 const TICKERS = [
   // ── Information Technology — Mega/Large ──────────────────────────────────
   "AAPL", "MSFT", "NVDA", "AVGO", "ADBE", "CRM", "AMD",
@@ -112,7 +177,7 @@ const TICKERS = [
   "ORCL", "IBM", "ACN", "INTU", "KLAC", "LRCX", "ASML",
   // ── Information Technology — Mid/Small ───────────────────────────────────
   "GTLB", "HUBS", "TWLO", "PCTY", "PAYC", "TOST", "BILL",
-  "APP", "TTD", "PUBM", "MGNI", "RAMP", "DV",
+  "APP", "TTD", "MGNI", "RAMP", "DV",
   "SMCI", "NTAP", "PSTG", "WDC", "STX",
   "SMAR", "ASAN", "BRZE", "ESTC",
   "CWAN", "ALKT", "JAMF", "GWRE", "KLIC",
@@ -446,6 +511,7 @@ async function fetchLiveStocks(): Promise<StockData[]> {
 
 interface CacheEntry {
   stocks: StockData[];
+  strategies: StockStrategies;
   cachedAt: string;
   fetchedAt: number;
 }
@@ -453,7 +519,7 @@ interface CacheEntry {
 let cache: CacheEntry | null = null;
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 
-async function getStocks(): Promise<CacheEntry> {
+async function getStocksCache(): Promise<CacheEntry> {
   const now = Date.now();
   if (cache && now - cache.fetchedAt < CACHE_TTL_MS) {
     logger.debug("Returning cached stock data");
@@ -464,15 +530,33 @@ async function getStocks(): Promise<CacheEntry> {
   const stocks = await fetchLiveStocks();
   cache = {
     stocks,
+    strategies: buildStrategies(stocks),
     cachedAt: new Date().toISOString(),
     fetchedAt: now,
   };
   return cache;
 }
 
+router.get("/stocks/strategies", async (_req, res) => {
+  try {
+    const result = await getStocksCache();
+    res.json({
+      strategies: result.strategies,
+      cachedAt: result.cachedAt,
+      source: "yahoo-finance",
+    });
+  } catch (err) {
+    logger.error({ err }, "Failed to fetch stock strategies");
+    res.status(500).json({
+      error: "fetch_failed",
+      message: "Failed to fetch stock strategy data from Yahoo Finance.",
+    });
+  }
+});
+
 router.get("/stocks", async (_req, res) => {
   try {
-    const result = await getStocks();
+    const result = await getStocksCache();
     res.json({
       stocks: result.stocks,
       cachedAt: result.cachedAt,

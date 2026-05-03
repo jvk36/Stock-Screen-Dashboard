@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import type { Stock, ScoredStock } from "@/lib/screener";
 import { filterDeepValue, defaultDeepValueFilters } from "@/lib/screener";
 import { StrategyBanner } from "@/components/StrategyBanner";
+import { PrimaryDriverBadge } from "@/components/PrimaryDriverBadge";
 import { TabFilterPanel, type FilterControl } from "@/components/TabFilterPanel";
 import { TabStockTable, type ColumnDef } from "@/components/TabStockTable";
 import { Badge } from "@/components/ui/badge";
@@ -114,6 +115,10 @@ export function DeepValueTab({ stocks }: { stocks: Stock[] }) {
   return (
     <div className="flex flex-col gap-6">
       <StrategyBanner quote={BANNER} />
+      <PrimaryDriverBadge
+        driver="Price-to-Book"
+        description="Lowest P/B first — stocks trading most below book value"
+      />
       <div className="flex flex-col lg:flex-row gap-8 items-start">
         <aside className="w-full lg:w-72 shrink-0">
           <TabFilterPanel
@@ -129,7 +134,7 @@ export function DeepValueTab({ stocks }: { stocks: Stock[] }) {
           <TabStockTable
             stocks={filteredStocks}
             columns={COLUMNS}
-            defaultSort={{ key: "evToEbitda", direction: "asc" }}
+            defaultSort={{ key: "priceToBook", direction: "asc" }}
           />
         </div>
       </div>

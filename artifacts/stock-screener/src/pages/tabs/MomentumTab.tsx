@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import type { Stock, ScoredStock } from "@/lib/screener";
 import { filterMomentum, defaultMomentumFilters } from "@/lib/screener";
 import { StrategyBanner } from "@/components/StrategyBanner";
+import { PrimaryDriverBadge } from "@/components/PrimaryDriverBadge";
 import { TabFilterPanel, type FilterControl } from "@/components/TabFilterPanel";
 import { TabStockTable, type ColumnDef } from "@/components/TabStockTable";
 import { Badge } from "@/components/ui/badge";
@@ -107,6 +108,10 @@ export function MomentumTab({ stocks }: { stocks: Stock[] }) {
   return (
     <div className="flex flex-col gap-6">
       <StrategyBanner quote={BANNER} />
+      <PrimaryDriverBadge
+        driver="Relative Strength vs S&P 500"
+        description="Strongest outperformers vs. the market over the past 52 weeks"
+      />
       <div className="flex flex-col lg:flex-row gap-8 items-start">
         <aside className="w-full lg:w-72 shrink-0">
           <TabFilterPanel
@@ -122,7 +127,7 @@ export function MomentumTab({ stocks }: { stocks: Stock[] }) {
           <TabStockTable
             stocks={filteredStocks}
             columns={COLUMNS}
-            defaultSort={{ key: "return52w", direction: "desc" }}
+            defaultSort={{ key: "returnVsSP500", direction: "desc" }}
           />
         </div>
       </div>

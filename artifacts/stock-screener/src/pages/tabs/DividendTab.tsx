@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import type { Stock, ScoredStock } from "@/lib/screener";
 import { filterDividend, defaultDividendFilters } from "@/lib/screener";
 import { StrategyBanner } from "@/components/StrategyBanner";
+import { PrimaryDriverBadge } from "@/components/PrimaryDriverBadge";
 import { TabFilterPanel, type FilterControl } from "@/components/TabFilterPanel";
 import { TabStockTable, type ColumnDef } from "@/components/TabStockTable";
 import { Badge } from "@/components/ui/badge";
@@ -95,7 +96,7 @@ const COLUMNS: ColumnDef[] = [
   },
 ];
 
-export function DividendTab({ stocks }: { stocks: Stock[] }) {
+export function DividendGrowthTab({ stocks }: { stocks: Stock[] }) {
   const [filters, setFilters] = useState(defaultDividendFilters);
   const filteredStocks: ScoredStock[] = useMemo(
     () => filterDividend(stocks, filters),
@@ -105,6 +106,10 @@ export function DividendTab({ stocks }: { stocks: Stock[] }) {
   return (
     <div className="flex flex-col gap-6">
       <StrategyBanner quote={BANNER} />
+      <PrimaryDriverBadge
+        driver="Yield × Safety (1 − Payout Ratio)"
+        description="Best yield/safety score: high yield combined with sustainable payout"
+      />
       <div className="flex flex-col lg:flex-row gap-8 items-start">
         <aside className="w-full lg:w-72 shrink-0">
           <TabFilterPanel
