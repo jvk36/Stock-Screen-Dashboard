@@ -15,13 +15,13 @@ type SortConfig = {
 };
 
 export function StockTable({ stocks }: StockTableProps) {
-  const [sortConfig, setSortConfig] = useState<SortConfig>({ key: "hundredBaggerScore", direction: "desc" });
+  // Default sort: highest EPS growth first — the dominant component of the GARP
+  // primary driver (epsGrowth5yr − 1/forwardPE), preserving the server-side ordering.
+  const [sortConfig, setSortConfig] = useState<SortConfig>({ key: "epsGrowth5yr", direction: "desc" });
 
   const sortedStocks = useMemo(() => {
-    let sortableItems = [...stocks];
-
-    // Pre-calculate ranks based on default score sort
-    const rankedItems = [...stocks].sort((a, b) => b.hundredBaggerScore - a.hundredBaggerScore).map((s, i) => ({ ...s, rank: i + 1 }));
+    // Pre-calculate ranks based on EPS growth (matches primary driver ordering)
+    const rankedItems = [...stocks].sort((a, b) => b.epsGrowth5yr - a.epsGrowth5yr).map((s, i) => ({ ...s, rank: i + 1 }));
 
     if (sortConfig !== null) {
       rankedItems.sort((a, b) => {

@@ -159,7 +159,7 @@ export function AsymmetricTab({ stocks }: { stocks: Stock[] }) {
           <TabStockTable
             stocks={filteredStocks}
             columns={COLUMNS}
-            defaultSort={{ key: "pctFromHigh", direction: "desc" }}
+            defaultSort={{ key: "score", direction: "desc" }}
           />
         </div>
       </div>

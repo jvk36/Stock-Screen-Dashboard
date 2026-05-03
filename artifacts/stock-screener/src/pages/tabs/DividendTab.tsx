@@ -125,7 +125,7 @@ export function DividendGrowthTab({ stocks }: { stocks: Stock[] }) {
           <TabStockTable
             stocks={filteredStocks}
             columns={COLUMNS}
-            defaultSort={{ key: "dividendYield", direction: "desc" }}
+            defaultSort={{ key: "score", direction: "desc" }}
           />
         </div>
       </div>
