@@ -1,13 +1,14 @@
 import { useState, useMemo, useRef } from "react";
 import type { Stock } from "@/lib/screener";
 import { useGetStocks, getGetStocksQueryKey } from "@workspace/api-client-react";
-import { Search, X } from "lucide-react";
+import { Search, X, ArrowRight, AlertCircle } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type Assessment = "excellent" | "good" | "ok" | "weak" | "na";
+type LookupStatus = "idle" | "loading" | "error";
 
 interface MetricRow {
   label: string;
@@ -26,8 +27,8 @@ interface StrategyFit {
 
 // ─── Formatters ───────────────────────────────────────────────────────────────
 
-const pct  = (v: number) => `${(v * 100).toFixed(1)}%`;
-const dec  = (v: number, d = 2) => v.toFixed(d);
+const pct   = (v: number) => `${(v * 100).toFixed(1)}%`;
+const dec   = (v: number, d = 2) => v.toFixed(d);
 const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
 
 // ─── Assessment styles ────────────────────────────────────────────────────────
@@ -48,7 +49,6 @@ const ASSESSMENT_LABELS: Record<Assessment, string> = {
   na:        "N/A",
 };
 
-// Coloured strategy name labels
 const STRATEGY_COLOR: Record<string, string> = {
   "garp":             "text-blue-600",
   "deep-value":       "text-amber-600",
@@ -319,7 +319,6 @@ function StrategyCard({ fit }: { fit: StrategyFit }) {
 
   return (
     <div className="bg-card border border-border rounded-xl p-5 flex flex-col gap-3 shadow-sm">
-      {/* Header row */}
       <div className="flex items-center justify-between gap-2">
         <span className={`font-semibold text-sm tracking-wide ${nameColor}`}>{fit.name}</span>
         {fit.qualifies ? (
@@ -333,17 +332,14 @@ function StrategyCard({ fit }: { fit: StrategyFit }) {
         )}
       </div>
 
-      {/* Score */}
       <div className="flex items-end gap-2">
         <span className={`text-4xl font-bold font-mono leading-none ${textColor}`}>{fit.score}</span>
         <span className="text-sm text-muted-foreground mb-0.5">/ 100</span>
       </div>
       <Progress value={fit.score} className="h-1.5 bg-muted" indicatorClassName={barColor} />
 
-      {/* Qualifier criteria */}
       <p className="text-[11px] text-muted-foreground leading-relaxed">{fit.qualifier}</p>
 
-      {/* Metric rows */}
       <div className="flex flex-col divide-y divide-border/60 mt-1">
         {fit.metrics.map((m) => (
           <div key={m.label} className="flex items-center justify-between py-2 gap-2">
@@ -364,9 +360,11 @@ function StrategyCard({ fit }: { fit: StrategyFit }) {
 // ─── Main tab ─────────────────────────────────────────────────────────────────
 
 export function StockAnalyzerTab() {
-  const [query, setQuery]               = useState("");
+  const [query, setQuery]                 = useState("");
   const [selectedStock, setSelectedStock] = useState<Stock | null>(null);
-  const [showDropdown, setShowDropdown]  = useState(false);
+  const [showDropdown, setShowDropdown]   = useState(false);
+  const [lookupStatus, setLookupStatus]   = useState<LookupStatus>("idle");
+  const [lookupError, setLookupError]     = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
   const { data, isLoading } = useGetStocks({
@@ -395,15 +393,51 @@ export function StockAnalyzerTab() {
     [selectedStock]
   );
 
+  async function handleLookup(raw: string) {
+    const ticker = raw.trim().toUpperCase().replace(/[^A-Z0-9.\-]/g, "");
+    if (!ticker) return;
+
+    // If it's already in the cached list, use it instantly
+    const cached = allStocks.find((s) => s.ticker === ticker);
+    if (cached) {
+      handleSelect(cached);
+      return;
+    }
+
+    setShowDropdown(false);
+    setSelectedStock(null);
+    setLookupError("");
+    setLookupStatus("loading");
+
+    try {
+      const res = await fetch(`/api/stocks/lookup/${encodeURIComponent(ticker)}`);
+      const json = await res.json();
+      if (!res.ok) {
+        setLookupError(json.message ?? `No data found for "${ticker}".`);
+        setLookupStatus("error");
+        return;
+      }
+      setSelectedStock(json.stock as Stock);
+      setLookupStatus("idle");
+    } catch {
+      setLookupError(`Could not fetch data for "${ticker}". Please check your connection and try again.`);
+      setLookupStatus("error");
+    }
+  }
+
   function handleSelect(stock: Stock) {
     setSelectedStock(stock);
     setQuery(stock.ticker);
+    setLookupStatus("idle");
+    setLookupError("");
     setShowDropdown(false);
   }
 
   function handleClear() {
     setSelectedStock(null);
     setQuery("");
+    setLookupStatus("idle");
+    setLookupError("");
     setShowDropdown(false);
     setTimeout(() => inputRef.current?.focus(), 0);
   }
@@ -412,8 +446,12 @@ export function StockAnalyzerTab() {
     const v = e.target.value.toUpperCase();
     setQuery(v);
     if (selectedStock && v !== selectedStock.ticker) setSelectedStock(null);
+    setLookupStatus("idle");
+    setLookupError("");
     setShowDropdown(true);
   }
+
+  const showLookupOption = query.trim().length >= 1 && suggestions.length === 0 && !isLoading;
 
   return (
     <div className="flex flex-col gap-6 max-w-5xl">
@@ -422,7 +460,7 @@ export function StockAnalyzerTab() {
       <div>
         <h2 className="text-lg font-semibold text-foreground mb-1">Stock Analyzer</h2>
         <p className="text-sm text-muted-foreground">
-          Search any stock in our universe to see how it scores across all 7 investment strategies.
+          Search any stock to see how it scores across all 7 investment strategies. Stocks outside our curated list are fetched live from Yahoo Finance.
         </p>
       </div>
 
@@ -436,13 +474,23 @@ export function StockAnalyzerTab() {
             onChange={handleInputChange}
             onFocus={() => query && setShowDropdown(true)}
             onBlur={() => setTimeout(() => setShowDropdown(false), 160)}
-            placeholder={isLoading ? "Loading stocks…" : "Search ticker or company name…"}
-            disabled={isLoading}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                if (suggestions.length > 0) {
+                  handleSelect(suggestions[0]!);
+                } else {
+                  handleLookup(query);
+                }
+              }
+            }}
+            placeholder={isLoading ? "Loading known stocks…" : "Ticker or company name — press Enter to look up any stock"}
+            disabled={lookupStatus === "loading"}
             className="flex-1 py-3 bg-transparent outline-none text-sm text-foreground placeholder:text-muted-foreground disabled:opacity-50"
             autoComplete="off"
             spellCheck={false}
           />
-          {(query || selectedStock) && (
+          {(query || selectedStock) && lookupStatus !== "loading" && (
             <button
               onClick={handleClear}
               className="text-muted-foreground hover:text-foreground transition-colors"
@@ -453,8 +501,8 @@ export function StockAnalyzerTab() {
           )}
         </div>
 
-        {/* Autocomplete dropdown */}
-        {showDropdown && suggestions.length > 0 && (
+        {/* Dropdown */}
+        {showDropdown && (suggestions.length > 0 || showLookupOption) && (
           <div className="absolute z-20 top-full mt-1 w-full bg-card border border-border rounded-lg shadow-md overflow-hidden">
             {suggestions.map((stock) => (
               <button
@@ -467,15 +515,52 @@ export function StockAnalyzerTab() {
                 <span className="text-xs text-muted-foreground/70 shrink-0">{stock.marketCap}</span>
               </button>
             ))}
+
+            {/* Look up on Yahoo Finance (shown only when no local matches) */}
+            {showLookupOption && (
+              <button
+                onMouseDown={() => handleLookup(query)}
+                className="w-full px-4 py-3 text-left flex items-center gap-3 hover:bg-muted/60 transition-colors border-t border-border/60"
+              >
+                <Search className="w-4 h-4 text-primary shrink-0" />
+                <span className="text-sm text-foreground flex-1">
+                  Look up <span className="font-mono font-bold text-primary">{query}</span> on Yahoo Finance
+                </span>
+                <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0" />
+              </button>
+            )}
           </div>
         )}
       </div>
 
+      {/* ── Loading state ─────────────────────────────────────────────────── */}
+      {lookupStatus === "loading" && (
+        <div className="flex items-center justify-center py-20">
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+            <p className="text-sm text-muted-foreground">
+              Fetching <span className="font-mono font-semibold">{query}</span> from Yahoo Finance…
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* ── Error state ───────────────────────────────────────────────────── */}
+      {lookupStatus === "error" && (
+        <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-xl max-w-lg">
+          <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-medium text-red-700">Lookup failed</p>
+            <p className="text-sm text-red-600 mt-0.5">{lookupError}</p>
+          </div>
+        </div>
+      )}
+
       {/* ── Selected stock header ──────────────────────────────────────────── */}
-      {selectedStock && (
+      {selectedStock && lookupStatus === "idle" && (
         <div className="flex items-start justify-between gap-4 p-4 bg-card border border-border rounded-xl shadow-sm">
           <div>
-            <div className="flex items-baseline gap-3">
+            <div className="flex items-baseline gap-3 flex-wrap">
               <span className="text-2xl font-bold font-mono text-foreground">{selectedStock.ticker}</span>
               <Badge variant="outline" className="text-xs font-normal">{selectedStock.sector}</Badge>
               <Badge variant="outline" className="text-xs font-normal">{selectedStock.marketCap}-cap</Badge>
@@ -494,7 +579,7 @@ export function StockAnalyzerTab() {
       )}
 
       {/* ── Strategy fit cards ────────────────────────────────────────────── */}
-      {fits && (
+      {fits && lookupStatus === "idle" && (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
           {fits.map((fit) => (
             <StrategyCard key={fit.id} fit={fit} />
@@ -503,24 +588,15 @@ export function StockAnalyzerTab() {
       )}
 
       {/* ── Empty state ───────────────────────────────────────────────────── */}
-      {!selectedStock && !isLoading && (
+      {!selectedStock && lookupStatus === "idle" && (
         <div className="flex flex-col items-center justify-center py-20 gap-3 text-center">
           <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center">
             <Search className="w-6 h-6 text-muted-foreground" />
           </div>
-          <p className="font-medium text-foreground">Search for a stock to analyze</p>
+          <p className="font-medium text-foreground">Search for any stock</p>
           <p className="text-sm text-muted-foreground max-w-sm">
-            Type a ticker (e.g. AAPL) or company name to see its fit score across all 7 investment strategies — GARP, Deep Value, Momentum, Quality, Dividend Growth, Asymmetric, and Trending.
+            Known tickers appear instantly. For any other stock, type the ticker and press Enter — we'll look it up live from Yahoo Finance.
           </p>
-        </div>
-      )}
-
-      {isLoading && (
-        <div className="flex items-center justify-center py-20">
-          <div className="flex flex-col items-center gap-3">
-            <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-            <p className="text-sm text-muted-foreground">Loading stock data…</p>
-          </div>
         </div>
       )}
     </div>

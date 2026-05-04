@@ -508,6 +508,120 @@ async function fetchChartReturns(
   }
 }
 
+/**
+ * Like fetchOneTicker but does NOT require pegRatio / forwardPE to be present,
+ * so it can return data for any publicly listed stock, ETF-adjacent, or ticker
+ * the user wants to look up (value stocks, dividend payers, etc.).
+ */
+async function fetchOneTickerLenient(ticker: string): Promise<StockData | null> {
+  try {
+    const result = await yahooFinance.quoteSummary(
+      ticker,
+      { modules: [...YF_MODULES] },
+      { validateResult: false }
+    );
+
+    const priceAny = result.price as Record<string, unknown> | null;
+    const company = (priceAny?.longName ?? priceAny?.shortName ?? ticker) as string;
+    const marketCapRaw =
+      (priceAny?.marketCap as number | undefined) ??
+      ((result.summaryDetail as Record<string, unknown> | null)?.marketCap as number | undefined);
+    if (!marketCapRaw || marketCapRaw <= 0) return null;
+
+    const sector = (result.assetProfile as { sector?: string } | null)?.sector;
+
+    const statsAny = result.defaultKeyStatistics as Record<string, unknown> | null;
+    const detailAny = result.summaryDetail as Record<string, unknown> | null;
+    const financialsAny = result.financialData as Record<string, unknown> | null;
+
+    const pegRatio   = (statsAny?.pegRatio   as number | undefined) ?? 0;
+    const forwardPE  = (detailAny?.forwardPE  as number | undefined) ?? 0;
+
+    const epsGrowth5yr  = (financialsAny?.earningsGrowth  as number | undefined) ?? 0;
+    const consecutiveYearsAbove16 = epsGrowth5yr >= 0.16 ? 1 : 0;
+    const revenueGrowth3yr = (financialsAny?.revenueGrowth as number | undefined) ?? 0;
+    const roe        = (financialsAny?.returnOnEquity  as number | undefined) ?? 0;
+    const netMargin  = (financialsAny?.profitMargins   as number | undefined) ?? 0;
+    const deRaw      = financialsAny?.debtToEquity as number | undefined;
+    const debtToEquity = deRaw != null && deRaw > 0 ? round2(deRaw / 100) : 0;
+
+    const trailingPE    = round2((detailAny?.trailingPE            as number | undefined) ?? 0);
+    const priceToBook   = round2((statsAny?.priceToBook            as number | undefined) ?? 0);
+    const evToEbitda    = round2((statsAny?.enterpriseToEbitda     as number | undefined) ?? 0);
+    const freeCashflow  = (financialsAny?.freeCashflow             as number | undefined) ?? 0;
+    const fcfYield = marketCapRaw > 0 && freeCashflow > 0
+      ? round4(freeCashflow / marketCapRaw) : 0;
+
+    const returnOnAssets   = round4((financialsAny?.returnOnAssets  as number | undefined) ?? 0);
+    const grossMargin      = round4((financialsAny?.grossMargins     as number | undefined) ?? 0);
+    const operatingMargin  = round4((financialsAny?.operatingMargins as number | undefined) ?? 0);
+    const currentRatio     = round2((financialsAny?.currentRatio     as number | undefined) ?? 0);
+
+    const dividendYield           = round4((detailAny?.dividendYield           as number | undefined) ?? 0);
+    const dividendRate            = round2((detailAny?.dividendRate            as number | undefined) ?? 0);
+    const payoutRatio             = round4((detailAny?.payoutRatio             as number | undefined) ?? 0);
+    const fiveYearAvgDividendYield = round4((detailAny?.fiveYearAvgDividendYield as number | undefined) ?? 0);
+
+    const statsRaw = statsAny as Record<string, unknown> | null;
+    const return52w       = round4((statsRaw?.["52WeekChange"]      as number | undefined) ?? 0);
+    const sp500Return52w  = (statsRaw?.["SandP52WeekChange"]        as number | undefined) ?? 0;
+    const returnVsSP500   = round4(return52w - sp500Return52w);
+
+    const regularMarketPrice = (priceAny?.regularMarketPrice as number | undefined) ?? 0;
+    const fiftyTwoWeekHigh   = (detailAny?.fiftyTwoWeekHigh  as number | undefined) ?? 0;
+    const pctFromHigh = fiftyTwoWeekHigh > 0 && regularMarketPrice > 0
+      ? round4(1 - regularMarketPrice / fiftyTwoWeekHigh) : 0;
+
+    const avgVol90d = (detailAny?.averageVolume            as number | undefined) ?? 0;
+    const avgVol10d =
+      (detailAny?.averageVolume10days          as number | undefined) ??
+      (detailAny?.averageDailyVolume10Day      as number | undefined) ?? 0;
+    const volumeTrend = avgVol90d > 0 ? round2(avgVol10d / avgVol90d) : 0;
+
+    const shortPercentOfFloat = round4((statsRaw?.shortPercentOfFloat as number | undefined) ?? 0);
+    const analystRating       = round2((financialsAny?.recommendationMean as number | undefined) ?? 0);
+
+    return calculateMetrics({
+      ticker,
+      company,
+      sector: normalizeSector(sector ?? "Other"),
+      marketCap: classifyMarketCap(marketCapRaw),
+      epsGrowth5yr: round4(epsGrowth5yr),
+      consecutiveYearsAbove16,
+      pegRatio: round2(pegRatio),
+      forwardPE: round2(forwardPE),
+      revenueGrowth3yr: round4(revenueGrowth3yr),
+      roe: round4(roe),
+      netMargin: round4(netMargin),
+      debtToEquity,
+      trailingPE,
+      priceToBook,
+      evToEbitda,
+      fcfYield,
+      returnOnAssets,
+      grossMargin,
+      operatingMargin,
+      currentRatio,
+      dividendYield,
+      dividendRate,
+      payoutRatio,
+      fiveYearAvgDividendYield,
+      return52w,
+      returnVsSP500,
+      return3m: 0,
+      return1m: 0,
+      pctFromHigh,
+      volumeTrend,
+      shortPercentOfFloat,
+      analystRating,
+      price: round2(regularMarketPrice),
+    });
+  } catch (err) {
+    logger.warn({ ticker, err: (err as Error).message }, "Lenient lookup fetch failed");
+    return null;
+  }
+}
+
 async function fetchLiveStocks(): Promise<StockData[]> {
   logger.info(
     { count: TICKERS.length },
@@ -580,6 +694,42 @@ async function getStocksCache(): Promise<CacheEntry> {
   };
   return cache;
 }
+
+router.get("/stocks/lookup/:ticker", async (req, res) => {
+  const raw = (req.params as Record<string, string>).ticker ?? "";
+  const ticker = raw.toUpperCase().replace(/[^A-Z0-9.\-]/g, "").slice(0, 10);
+  if (!ticker) {
+    return res.status(400).json({ error: "invalid_ticker", message: "Invalid ticker symbol." });
+  }
+
+  // Serve from main cache when available (instant, no extra YF call)
+  if (cache) {
+    const cached = cache.stocks.find((s) => s.ticker === ticker);
+    if (cached) {
+      return res.json({ stock: cached, source: "cache" });
+    }
+  }
+
+  try {
+    const [stockData, chartReturns] = await Promise.all([
+      fetchOneTickerLenient(ticker),
+      fetchChartReturns(ticker),
+    ]);
+
+    if (!stockData) {
+      return res.status(404).json({
+        error: "not_found",
+        message: `No data found for "${ticker}". Double-check the ticker or try a US-listed stock.`,
+      });
+    }
+
+    logger.info({ ticker }, "Ad-hoc stock lookup served from Yahoo Finance");
+    return res.json({ stock: { ...stockData, ...chartReturns }, source: "yahoo-finance" });
+  } catch (err) {
+    logger.error({ ticker, err }, "Ad-hoc stock lookup failed");
+    return res.status(500).json({ error: "fetch_failed", message: "Failed to fetch stock data. Please try again." });
+  }
+});
 
 router.get("/stocks/strategies", async (_req, res) => {
   try {
