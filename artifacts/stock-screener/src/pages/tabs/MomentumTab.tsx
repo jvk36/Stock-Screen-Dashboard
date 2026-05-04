@@ -14,10 +14,10 @@ stocks that have outperformed tend to continue outperforming over the next 3–1
 This screener surfaces leaders — companies beating the market with price and earnings momentum.";
 
 const FILTER_CONTROLS: FilterControl[] = [
-  { type: "slider-min", field: "return52wMin", label: "52-Week Return (Min)", min: -30, max: 100, step: 5, format: (v) => `${v}%` },
-  { type: "slider-min", field: "returnVsSP500Min", label: "vs. S&P 500 (Min)", min: -30, max: 60, step: 5, format: (v) => `${v >= 0 ? "+" : ""}${v}%` },
-  { type: "slider-min", field: "return3mMin", label: "3-Month Return (Min)", min: -20, max: 50, step: 5, format: (v) => `${v}%` },
-  { type: "slider-max", field: "pctFromHighMax", label: "% Below 52wk High (Max)", min: 0, max: 50, step: 5, format: (v) => `${v}%` },
+  { type: "slider-min", field: "return52wMin", label: "52-Week Return (Min)", min: -100, max: 100, step: 5, format: (v) => v <= -100 ? "No min" : `${v}%` },
+  { type: "slider-min", field: "returnVsSP500Min", label: "vs. S&P 500 (Min)", min: -100, max: 60, step: 5, format: (v) => v <= -100 ? "No min" : `${v >= 0 ? "+" : ""}${v}%` },
+  { type: "slider-min", field: "return3mMin", label: "3-Month Return (Min)", min: -100, max: 50, step: 5, format: (v) => v <= -100 ? "No min" : `${v}%` },
+  { type: "slider-max", field: "pctFromHighMax", label: "% Below 52wk High (Max)", min: 0, max: 100, step: 5, format: (v) => v >= 100 ? "No limit" : `${v}%` },
   { type: "market-caps" },
   { type: "sectors" },
 ];

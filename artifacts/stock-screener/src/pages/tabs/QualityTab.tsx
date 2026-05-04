@@ -14,12 +14,12 @@ Quality investing targets durable competitive advantages: high returns on capita
 and businesses that compound value year after year.";
 
 const FILTER_CONTROLS: FilterControl[] = [
-  { type: "slider-min", field: "roeMin", label: "Return on Equity (Min)", min: 0, max: 60, step: 5, format: (v) => `${v}%` },
-  { type: "slider-min", field: "roaMin", label: "Return on Assets (Min)", min: 0, max: 30, step: 2, format: (v) => `${v}%` },
-  { type: "slider-min", field: "operatingMarginMin", label: "Operating Margin (Min)", min: 0, max: 50, step: 5, format: (v) => `${v}%` },
+  { type: "slider-min", field: "roeMin", label: "Return on Equity (Min)", min: -50, max: 60, step: 5, format: (v) => v <= -50 ? "No min" : `${v}%` },
+  { type: "slider-min", field: "roaMin", label: "Return on Assets (Min)", min: -50, max: 30, step: 2, format: (v) => v <= -50 ? "No min" : `${v}%` },
+  { type: "slider-min", field: "operatingMarginMin", label: "Operating Margin (Min)", min: -50, max: 50, step: 5, format: (v) => v <= -50 ? "No min" : `${v}%` },
   { type: "slider-min", field: "grossMarginMin", label: "Gross Margin (Min)", min: 0, max: 80, step: 5, format: (v) => `${v}%` },
   { type: "slider-min", field: "currentRatioMin", label: "Current Ratio (Min)", min: 0, max: 5, step: 0.25, format: (v) => `${v.toFixed(2)}x` },
-  { type: "slider-max", field: "debtEqMax", label: "Debt / Equity (Max)", min: 0, max: 5, step: 0.1, format: (v) => `${v.toFixed(1)}x` },
+  { type: "slider-max", field: "debtEqMax", label: "Debt / Equity (Max)", min: 0, max: 10, step: 0.5, format: (v) => v >= 10 ? "No limit" : `${v.toFixed(1)}x` },
   { type: "market-caps" },
   { type: "sectors" },
 ];

@@ -14,9 +14,9 @@ the market is voting with real money. \
 The Trending screener captures short-term price-action leaders \u2014 stocks near their 52-week highs with accelerating momentum.";
 
 const FILTER_CONTROLS: FilterControl[] = [
-  { type: "slider-min", field: "return3mMin", label: "3-Month Return (Min)", min: -20, max: 60, step: 5, format: (v) => `${v}%` },
-  { type: "slider-min", field: "return1mMin", label: "1-Month Return (Min)", min: -10, max: 30, step: 2, format: (v) => `${v}%` },
-  { type: "slider-max", field: "pctFromHighMax", label: "% Below 52wk High (Max)", min: 0, max: 50, step: 5, format: (v) => `${v}%` },
+  { type: "slider-min", field: "return3mMin", label: "3-Month Return (Min)", min: -50, max: 60, step: 5, format: (v) => v <= -50 ? "No min" : `${v}%` },
+  { type: "slider-min", field: "return1mMin", label: "1-Month Return (Min)", min: -20, max: 30, step: 2, format: (v) => v <= -20 ? "No min" : `${v}%` },
+  { type: "slider-max", field: "pctFromHighMax", label: "% Below 52wk High (Max)", min: 0, max: 100, step: 5, format: (v) => v >= 100 ? "No limit" : `${v}%` },
   { type: "slider-min", field: "volumeTrendMin", label: "Volume Trend (Min)", min: 0, max: 3, step: 0.1, format: (v) => `${v.toFixed(1)}x avg` },
   { type: "market-caps" },
   { type: "sectors" },

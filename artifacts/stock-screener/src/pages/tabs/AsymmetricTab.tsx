@@ -31,7 +31,7 @@ const analystColor = (r: number) => {
 };
 
 const FILTER_CONTROLS: FilterControl[] = [
-  { type: "slider-min", field: "pctFromHighMin", label: "% Below 52wk High (Min)", min: 0, max: 80, step: 5, format: (v) => `${v}%` },
+  { type: "slider-min", field: "pctFromHighMin", label: "% Below 52wk High (Min)", min: 0, max: 80, step: 5, format: (v) => v <= 0 ? "No min" : `${v}%` },
   { type: "slider-max", field: "evToEbitdaMax", label: "EV / EBITDA (Max)", min: 5, max: 100, step: 5, format: (v) => `${v}x` },
   { type: "slider-max", field: "trailingPEMax", label: "Trailing P/E (Max)", min: 5, max: 200, step: 10, format: (v) => `${v}x` },
   {

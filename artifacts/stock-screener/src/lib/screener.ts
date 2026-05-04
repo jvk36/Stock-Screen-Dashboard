@@ -251,12 +251,12 @@ export interface DeepValueFilterState {
 }
 
 export const defaultDeepValueFilters: DeepValueFilterState = {
-  trailingPEMax: 60,    // Banks & cyclicals can have variable PE; raised to avoid blanking the list
-  pbMax: 5,
-  evToEbitdaMax: 20,
-  fcfYieldMin: 0,
-  netMarginMin: 0,
-  debtEqMax: 20,        // Banks are naturally 10-20x leveraged via deposits — must be high
+  trailingPEMax: 200,   // Slider ceiling — nothing filtered by default (WBD has PE ~93)
+  pbMax: 20,            // Slider ceiling — nothing filtered by default
+  evToEbitdaMax: 100,   // Slider ceiling — nothing filtered (CLF has EV/EBITDA ~76)
+  fcfYieldMin: -20,     // Slider floor — allow negative FCF (distressed cyclicals)
+  netMarginMin: -50,    // Slider floor — allow negative margins (CLF -6.4%, F -3.2%)
+  debtEqMax: 20,        // Slider ceiling — banks/insurers can have high reported D/E
   marketCaps: [...ALL_MARKET_CAPS],
   sectors: [...ALL_SECTORS],
 };
@@ -297,10 +297,10 @@ export interface MomentumFilterState {
 }
 
 export const defaultMomentumFilters: MomentumFilterState = {
-  return52wMin: 0,
-  returnVsSP500Min: 0,
-  return3mMin: 0,
-  pctFromHighMax: 100,
+  return52wMin: -100,      // Slider floor — stocks can beat S&P while having negative absolute 52w return
+  returnVsSP500Min: -100,  // Slider floor — MSTR (-82%), AXON (-63%), SMR (-57%) need full open floor
+  return3mMin: -100,       // Slider floor — strong leaders can have negative 3m in volatile markets
+  pctFromHighMax: 100,     // Slider ceiling — already fully open
   marketCaps: [...ALL_MARKET_CAPS],
   sectors: [...ALL_SECTORS],
 };
@@ -340,12 +340,12 @@ export interface QualityFilterState {
 }
 
 export const defaultQualityFilters: QualityFilterState = {
-  roeMin: 0,
-  roaMin: 0,
-  operatingMarginMin: 0,
-  grossMarginMin: 0,
-  currentRatioMin: 0,
-  debtEqMax: 5,
+  roeMin: -50,     // Slider floor — high-growth names (AXON) may have temporarily negative ROE
+  roaMin: -50,     // Slider floor — AXON has negative ROA during heavy-investment phase
+  operatingMarginMin: -50,  // Slider floor — allow negative op margin (growth phase)
+  grossMarginMin: 0,        // Gross margin is rarely negative for quality picks; keep at 0
+  currentRatioMin: 0,       // Slider floor — already open (0 means no minimum applied)
+  debtEqMax: 10,   // Slider ceiling — HD has D/E=5.14; raised to avoid cutting legitimate picks
   marketCaps: [...ALL_MARKET_CAPS],
   sectors: [...ALL_SECTORS],
 };
@@ -388,11 +388,11 @@ export interface DividendFilterState {
 }
 
 export const defaultDividendFilters: DividendFilterState = {
-  dividendYieldMin: 0,
-  payoutRatioMax: 90,
-  fiveYearAvgYieldMin: 0,
-  epsGrowthMin: 0,
-  debtEqMax: 5,
+  dividendYieldMin: 0,       // Slider floor — already open
+  payoutRatioMax: 999,       // Sentinel "no limit" — REITs like O (275%), ABBV (326%), GPC (944%) all pass
+  fiveYearAvgYieldMin: 0,    // Slider floor — already open
+  epsGrowthMin: -100,        // Slider floor — PSX (-56.8%) and JNJ (-52.9%) need floor below -50%
+  debtEqMax: 20,             // Slider ceiling — utilities and consumer staples are leveraged; CL=16x
   marketCaps: [...ALL_MARKET_CAPS],
   sectors: [...ALL_SECTORS],
 };
@@ -434,11 +434,11 @@ export interface AsymmetricFilterState {
 }
 
 export const defaultAsymmetricFilters: AsymmetricFilterState = {
-  pctFromHighMin: 5,    // Show slightly-off-high stocks too; deeply beaten-down ones rank first
-  evToEbitdaMax: 100,   // Many asymmetric plays are unprofitable; high ceiling avoids blanking list
-  trailingPEMax: 200,   // MSTR, COIN etc. can have very high or negative P/E
-  analystRatingMax: 5,  // Include all ratings; ranking composite already weighs this
-  shortFloatMin: 0,
+  pctFromHighMin: 0,    // Slider floor — CVS/INTC are only 3-4% below high, must not cut them
+  evToEbitdaMax: 100,   // Slider ceiling — unprofitable plays have no EV/EBITDA (passes as 0)
+  trailingPEMax: 200,   // Slider ceiling — MSTR/COIN have very high or negative PE
+  analystRatingMax: 5,  // Slider ceiling — include all ratings
+  shortFloatMin: 0,     // Slider floor — show all regardless of short interest
   marketCaps: [...ALL_MARKET_CAPS],
   sectors: [...ALL_SECTORS],
 };
@@ -481,10 +481,10 @@ export interface TrendingFilterState {
 }
 
 export const defaultTrendingFilters: TrendingFilterState = {
-  return3mMin: 0,
-  return1mMin: 0,
-  pctFromHighMax: 100,
-  volumeTrendMin: 0,
+  return3mMin: -50,    // Slider floor — NVDA/AAPL had slightly negative returns in recent months
+  return1mMin: -20,    // Slider floor — allow small dips; ranking already puts best 1m return first
+  pctFromHighMax: 100, // Slider ceiling — fully open
+  volumeTrendMin: 0,   // Slider floor — fully open
   marketCaps: [...ALL_MARKET_CAPS],
   sectors: [...ALL_SECTORS],
 };

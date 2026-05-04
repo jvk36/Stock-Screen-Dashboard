@@ -15,10 +15,10 @@ compounding income while building a margin of safety against capital loss.";
 
 const FILTER_CONTROLS: FilterControl[] = [
   { type: "slider-min", field: "dividendYieldMin", label: "Dividend Yield (Min)", min: 0, max: 10, step: 0.25, format: (v) => `${v.toFixed(2)}%` },
-  { type: "slider-max", field: "payoutRatioMax", label: "Payout Ratio (Max)", min: 10, max: 100, step: 5, format: (v) => `${v}%` },
+  { type: "slider-max", field: "payoutRatioMax", label: "Payout Ratio (Max)", min: 10, max: 999, step: 10, format: (v) => v >= 999 ? "No limit" : `${v}%` },
   { type: "slider-min", field: "fiveYearAvgYieldMin", label: "5-Year Avg Yield (Min)", min: 0, max: 8, step: 0.25, format: (v) => `${v.toFixed(2)}%` },
-  { type: "slider-min", field: "epsGrowthMin", label: "EPS Growth (Min)", min: -10, max: 20, step: 1, format: (v) => `${v}%` },
-  { type: "slider-max", field: "debtEqMax", label: "Debt / Equity (Max)", min: 0, max: 5, step: 0.1, format: (v) => `${v.toFixed(1)}x` },
+  { type: "slider-min", field: "epsGrowthMin", label: "EPS Growth (Min)", min: -100, max: 20, step: 5, format: (v) => v <= -100 ? "No min" : `${v}%` },
+  { type: "slider-max", field: "debtEqMax", label: "Debt / Equity (Max)", min: 0, max: 20, step: 1, format: (v) => v >= 20 ? "No limit" : `${v.toFixed(0)}x` },
   { type: "market-caps" },
   { type: "sectors" },
 ];
