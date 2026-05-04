@@ -14,10 +14,11 @@ import { QualityTab } from "@/pages/tabs/QualityTab";
 import { DividendGrowthTab } from "@/pages/tabs/DividendTab";
 import { AsymmetricTab } from "@/pages/tabs/AsymmetricTab";
 import { TrendingTab } from "@/pages/tabs/TrendingTab";
+import { StockAnalyzerTab } from "@/pages/tabs/StockAnalyzerTab";
 
 type DataMode = "live" | "demo-fallback" | "loading";
 
-type TabId = "garp" | "deep-value" | "momentum" | "quality" | "dividend-growth" | "asymmetric" | "trending";
+type TabId = "garp" | "deep-value" | "momentum" | "quality" | "dividend-growth" | "asymmetric" | "trending" | "analyzer";
 
 const TABS: { id: TabId; label: string }[] = [
   { id: "garp",             label: "GARP" },
@@ -27,6 +28,7 @@ const TABS: { id: TabId; label: string }[] = [
   { id: "dividend-growth",  label: "Dividend Growth" },
   { id: "asymmetric",       label: "Asymmetric" },
   { id: "trending",         label: "Trending" },
+  { id: "analyzer",         label: "Stock Analyzer" },
 ];
 
 const GARP_BANNER =
@@ -179,6 +181,7 @@ export default function Dashboard() {
         {activeTab === "dividend-growth" && <DividendGrowthTab stocks={strategies.dividendGrowth as Stock[]} />}
         {activeTab === "asymmetric"      && <AsymmetricTab    stocks={strategies.asymmetric as Stock[]} />}
         {activeTab === "trending"        && <TrendingTab      stocks={strategies.trending as Stock[]} />}
+        {activeTab === "analyzer"        && <StockAnalyzerTab />}
       </main>
     </div>
   );
