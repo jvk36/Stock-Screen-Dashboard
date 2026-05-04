@@ -251,12 +251,12 @@ export interface DeepValueFilterState {
 }
 
 export const defaultDeepValueFilters: DeepValueFilterState = {
-  trailingPEMax: 30,
+  trailingPEMax: 60,    // Banks & cyclicals can have variable PE; raised to avoid blanking the list
   pbMax: 5,
   evToEbitdaMax: 20,
   fcfYieldMin: 0,
   netMarginMin: 0,
-  debtEqMax: 3,
+  debtEqMax: 20,        // Banks are naturally 10-20x leveraged via deposits — must be high
   marketCaps: [...ALL_MARKET_CAPS],
   sectors: [...ALL_SECTORS],
 };
@@ -434,10 +434,10 @@ export interface AsymmetricFilterState {
 }
 
 export const defaultAsymmetricFilters: AsymmetricFilterState = {
-  pctFromHighMin: 10,
-  evToEbitdaMax: 30,
-  trailingPEMax: 30,
-  analystRatingMax: 4,
+  pctFromHighMin: 5,    // Show slightly-off-high stocks too; deeply beaten-down ones rank first
+  evToEbitdaMax: 100,   // Many asymmetric plays are unprofitable; high ceiling avoids blanking list
+  trailingPEMax: 200,   // MSTR, COIN etc. can have very high or negative P/E
+  analystRatingMax: 5,  // Include all ratings; ranking composite already weighs this
   shortFloatMin: 0,
   marketCaps: [...ALL_MARKET_CAPS],
   sectors: [...ALL_SECTORS],

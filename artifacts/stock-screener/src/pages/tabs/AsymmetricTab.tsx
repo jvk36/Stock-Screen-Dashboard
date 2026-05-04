@@ -32,13 +32,13 @@ const analystColor = (r: number) => {
 
 const FILTER_CONTROLS: FilterControl[] = [
   { type: "slider-min", field: "pctFromHighMin", label: "% Below 52wk High (Min)", min: 0, max: 80, step: 5, format: (v) => `${v}%` },
-  { type: "slider-max", field: "evToEbitdaMax", label: "EV / EBITDA (Max)", min: 5, max: 50, step: 1, format: (v) => `${v}x` },
-  { type: "slider-max", field: "trailingPEMax", label: "Trailing P/E (Max)", min: 5, max: 60, step: 1, format: (v) => `${v}x` },
+  { type: "slider-max", field: "evToEbitdaMax", label: "EV / EBITDA (Max)", min: 5, max: 100, step: 5, format: (v) => `${v}x` },
+  { type: "slider-max", field: "trailingPEMax", label: "Trailing P/E (Max)", min: 5, max: 200, step: 10, format: (v) => `${v}x` },
   {
     type: "slider-max", field: "analystRatingMax", label: "Analyst Rating (Max)", min: 1, max: 5, step: 0.5,
     format: (v) => `${v.toFixed(1)} (${analystLabel(v)})`,
   },
-  { type: "slider-min", field: "shortFloatMin", label: "Short Float % (Min)", min: 0, max: 30, step: 1, format: (v) => `${v}%` },
+  { type: "slider-min", field: "shortFloatMin", label: "Short Float % (Min)", min: 0, max: 40, step: 1, format: (v) => `${v}%` },
   { type: "market-caps" },
   { type: "sectors" },
 ];
@@ -141,8 +141,8 @@ export function AsymmetricTab({ stocks }: { stocks: Stock[] }) {
     <div className="flex flex-col gap-6">
       <StrategyBanner quote={BANNER} />
       <PrimaryDriverBadge
-        driver="Discount × Analyst Conviction"
-        description="Deepest selloffs with strongest analyst buy ratings — LEAPs/catalyst setups"
+        driver="Downside + Short Interest + Cheap P/E"
+        description="Most beaten-down stocks with high short interest and cheap trailing P/E — asymmetric risk/reward"
       />
       <div className="flex flex-col lg:flex-row gap-8 items-start">
         <aside className="w-full lg:w-72 shrink-0">

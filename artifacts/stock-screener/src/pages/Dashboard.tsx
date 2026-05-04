@@ -46,7 +46,8 @@ export default function Dashboard() {
     query: {
       queryKey: getGetStockStrategiesQueryKey(),
       staleTime: 5 * 60 * 1000,
-      retry: false,
+      retry: 3,
+      retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 10000),
     },
   });
 

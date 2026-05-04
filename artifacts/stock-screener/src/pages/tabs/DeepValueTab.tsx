@@ -14,12 +14,12 @@ The second-best business is one that requires no capital. \u2014 Warren Buffett.
 Deep Value identifies stocks priced below intrinsic worth: low multiples, strong cash flow, and a margin of safety baked in.";
 
 const FILTER_CONTROLS: FilterControl[] = [
-  { type: "slider-max", field: "trailingPEMax", label: "Trailing P/E (Max)", min: 5, max: 60, step: 1, format: (v) => `${v}x` },
+  { type: "slider-max", field: "trailingPEMax", label: "Trailing P/E (Max)", min: 5, max: 100, step: 5, format: (v) => `${v}x` },
   { type: "slider-max", field: "pbMax", label: "Price / Book (Max)", min: 0.5, max: 10, step: 0.5, format: (v) => `${v.toFixed(1)}x` },
   { type: "slider-max", field: "evToEbitdaMax", label: "EV / EBITDA (Max)", min: 2, max: 30, step: 1, format: (v) => `${v}x` },
   { type: "slider-min", field: "fcfYieldMin", label: "FCF Yield (Min)", min: 0, max: 15, step: 0.5, format: (v) => `${v.toFixed(1)}%` },
   { type: "slider-min", field: "netMarginMin", label: "Net Margin (Min)", min: 0, max: 30, step: 1, format: (v) => `${v}%` },
-  { type: "slider-max", field: "debtEqMax", label: "Debt / Equity (Max)", min: 0, max: 5, step: 0.1, format: (v) => `${v.toFixed(1)}x` },
+  { type: "slider-max", field: "debtEqMax", label: "Debt / Equity (Max)", min: 0, max: 20, step: 1, format: (v) => `${v.toFixed(0)}x` },
   { type: "market-caps" },
   { type: "sectors" },
 ];
