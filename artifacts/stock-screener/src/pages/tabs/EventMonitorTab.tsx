@@ -48,6 +48,8 @@ interface BankruptcyEvent {
 }
 interface EventsResponse {
   dataAsOf: string;
+  curationDate: string;
+  indexNote: string;
   indexChanges: IndexChangeEvent[];
   maArbitrage: MAArbEvent[];
   maCancellations: MACancellationEvent[];
@@ -552,13 +554,21 @@ export function EventMonitorTab() {
           Monitor high-conviction event-driven opportunities: index rebalances, M&A arbitrage spreads, activist
           campaigns, corporate spin-offs, and bankruptcy reorganizations — all enriched with live prices from Yahoo Finance.
         </p>
-        <p className="text-xs text-muted-foreground/60 mt-2">
-          Event metadata is manually curated from SEC EDGAR, company press releases, and financial news (data reflects known events as of early 2025).
-          Prices are fetched live. Verify all details with primary sources before acting.
-          {dataUpdatedAt > 0 && (
-            <span> · Prices as of {new Date(dataUpdatedAt).toLocaleTimeString()}</span>
+        <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2">
+          {data?.curationDate && (
+            <p className="text-xs text-muted-foreground/60">
+              Event data curated: {dateFmt(data.curationDate)}
+            </p>
           )}
-        </p>
+          {dataUpdatedAt > 0 && (
+            <p className="text-xs text-muted-foreground/60">
+              Prices as of: {new Date(dataUpdatedAt).toLocaleTimeString()}
+            </p>
+          )}
+          <p className="text-xs text-muted-foreground/60">
+            Verify all details with SEC EDGAR or financial news before acting.
+          </p>
+        </div>
       </div>
 
       {/* Category Pills */}
@@ -616,6 +626,12 @@ export function EventMonitorTab() {
         )}
         {data && (
           <>
+            {(activeCategory === "index-add" || activeCategory === "index-exit") && data.indexNote && (
+              <div className="flex gap-2 items-start rounded-md border border-amber-500/30 bg-amber-500/8 px-4 py-3">
+                <span className="text-amber-400 text-sm mt-px shrink-0">⚡</span>
+                <p className="text-xs text-amber-300/90 leading-relaxed">{data.indexNote.replace(/^⚡\s*/, "")}</p>
+              </div>
+            )}
             {activeCategory === "index-add"  && <IndexChangesTable events={indexAdditions} />}
             {activeCategory === "index-exit" && <IndexChangesTable events={indexExits} />}
             {activeCategory === "ma-arb"     && <MAArbTable events={data.maArbitrage} />}
