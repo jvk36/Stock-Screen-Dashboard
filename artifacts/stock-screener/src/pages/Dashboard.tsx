@@ -15,10 +15,12 @@ import { DividendGrowthTab } from "@/pages/tabs/DividendTab";
 import { AsymmetricTab } from "@/pages/tabs/AsymmetricTab";
 import { TrendingTab } from "@/pages/tabs/TrendingTab";
 import { StockAnalyzerTab } from "@/pages/tabs/StockAnalyzerTab";
+import { CustomScreenerTab } from "@/pages/tabs/CustomScreenerTab";
+import type { StrategyStocks } from "@/lib/screener";
 
 type DataMode = "live" | "demo-fallback" | "loading";
 
-type TabId = "garp" | "deep-value" | "momentum" | "quality" | "dividend-growth" | "asymmetric" | "trending" | "analyzer";
+type TabId = "garp" | "deep-value" | "momentum" | "quality" | "dividend-growth" | "asymmetric" | "trending" | "custom" | "analyzer";
 
 const TABS: { id: TabId; label: string }[] = [
   { id: "garp",             label: "GARP" },
@@ -28,6 +30,7 @@ const TABS: { id: TabId; label: string }[] = [
   { id: "dividend-growth",  label: "Dividend Growth" },
   { id: "asymmetric",       label: "Asymmetric" },
   { id: "trending",         label: "Trending" },
+  { id: "custom",           label: "Custom Screener" },
   { id: "analyzer",         label: "Stock Analyzer" },
 ];
 
@@ -182,6 +185,7 @@ export default function Dashboard() {
         {activeTab === "dividend-growth" && <DividendGrowthTab stocks={strategies.dividendGrowth as Stock[]} />}
         {activeTab === "asymmetric"      && <AsymmetricTab    stocks={strategies.asymmetric as Stock[]} />}
         {activeTab === "trending"        && <TrendingTab      stocks={strategies.trending as Stock[]} />}
+        {activeTab === "custom"          && <CustomScreenerTab strategies={strategies as unknown as StrategyStocks} />}
         {activeTab === "analyzer"        && <StockAnalyzerTab />}
       </main>
     </div>

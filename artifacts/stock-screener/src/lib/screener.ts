@@ -509,3 +509,142 @@ export function filterTrending(stocks: Stock[], filters: TrendingFilterState): S
       return true;
     });
 }
+
+// ─── Custom Screener ──────────────────────────────────────────────────────────
+// Universe: deduplicated union of all 7 strategy ticker pools (~205 names).
+// Domains are opt-in: enabling a domain activates its sliders; disabled domains
+// impose no constraints so the full universe shows through by default.
+
+export type CustomScreenerDomain =
+  | "valuation"
+  | "growth"
+  | "profitability"
+  | "health"
+  | "momentum"
+  | "signals";
+
+export interface CustomScreenerFilters {
+  enabledDomains: CustomScreenerDomain[];
+  // Domain 1 — Valuation
+  trailingPEMax: number;
+  forwardPEMax: number;
+  pegMax: number;
+  pbMax: number;
+  evToEbitdaMax: number;
+  dividendYieldMin: number;
+  // Domain 2 — Growth
+  epsGrowth5yrMin: number;
+  revenueGrowth3yrMin: number;
+  // Domain 3 — Profitability & Quality
+  roeMin: number;
+  grossMarginMin: number;
+  operatingMarginMin: number;
+  netMarginMin: number;
+  fcfYieldMin: number;
+  // Domain 4 — Financial Health
+  debtEqMax: number;
+  currentRatioMin: number;
+  payoutRatioMax: number;
+  // Domain 5 — Momentum & Technicals
+  return52wMin: number;
+  return3mMin: number;
+  return1mMin: number;
+  returnVsSP500Min: number;
+  pctFromHighMax: number;
+  volumeTrendMin: number;
+  // Domain 6 — Special Signals
+  shortFloatMax: number;
+  analystRatingMax: number;
+  // Global
+  marketCaps: string[];
+  sectors: string[];
+}
+
+export const defaultCustomScreenerFilters: CustomScreenerFilters = {
+  enabledDomains: [],
+  // Valuation — slider ceilings (nothing filtered by default)
+  trailingPEMax: 200,
+  forwardPEMax: 100,
+  pegMax: 5,
+  pbMax: 10,
+  evToEbitdaMax: 50,
+  dividendYieldMin: 0,
+  // Growth — slider floors
+  epsGrowth5yrMin: -100,
+  revenueGrowth3yrMin: -100,
+  // Profitability — slider floors
+  roeMin: -100,
+  grossMarginMin: 0,
+  operatingMarginMin: -50,
+  netMarginMin: -50,
+  fcfYieldMin: -20,
+  // Health — slider extremes
+  debtEqMax: 20,
+  currentRatioMin: 0,
+  payoutRatioMax: 999,
+  // Momentum — slider floors / ceilings
+  return52wMin: -100,
+  return3mMin: -100,
+  return1mMin: -20,
+  returnVsSP500Min: -100,
+  pctFromHighMax: 100,
+  volumeTrendMin: 0,
+  // Signals — slider extremes
+  shortFloatMax: 60,
+  analystRatingMax: 5,
+  // Global
+  marketCaps: [...ALL_MARKET_CAPS],
+  sectors: [...ALL_SECTORS],
+};
+
+export function filterCustomScreener(stocks: Stock[], filters: CustomScreenerFilters): Stock[] {
+  const { enabledDomains } = filters;
+  return stocks.filter((s) => {
+    if (filters.marketCaps.length && !filters.marketCaps.includes(s.marketCap)) return false;
+    if (filters.sectors.length && !filters.sectors.includes(s.sector)) return false;
+
+    if (enabledDomains.includes("valuation")) {
+      if (s.trailingPE > 0 && s.trailingPE > filters.trailingPEMax) return false;
+      if (s.forwardPE > 0 && s.forwardPE > filters.forwardPEMax) return false;
+      if (s.pegRatio > 0 && s.pegRatio > filters.pegMax) return false;
+      if (s.priceToBook > 0 && s.priceToBook > filters.pbMax) return false;
+      if (s.evToEbitda > 0 && s.evToEbitda > filters.evToEbitdaMax) return false;
+      if (s.dividendYield * 100 < filters.dividendYieldMin) return false;
+    }
+
+    if (enabledDomains.includes("growth")) {
+      if (s.epsGrowth5yr * 100 < filters.epsGrowth5yrMin) return false;
+      if (s.revenueGrowth3yr * 100 < filters.revenueGrowth3yrMin) return false;
+    }
+
+    if (enabledDomains.includes("profitability")) {
+      if (s.roe * 100 < filters.roeMin) return false;
+      if (s.grossMargin * 100 < filters.grossMarginMin) return false;
+      if (s.operatingMargin * 100 < filters.operatingMarginMin) return false;
+      if (s.netMargin * 100 < filters.netMarginMin) return false;
+      if (s.fcfYield * 100 < filters.fcfYieldMin) return false;
+    }
+
+    if (enabledDomains.includes("health")) {
+      if (s.debtToEquity > 0 && s.debtToEquity > filters.debtEqMax) return false;
+      if (s.currentRatio > 0 && s.currentRatio < filters.currentRatioMin) return false;
+      if (s.payoutRatio > 0 && s.payoutRatio * 100 > filters.payoutRatioMax) return false;
+    }
+
+    if (enabledDomains.includes("momentum")) {
+      if (s.return52w * 100 < filters.return52wMin) return false;
+      if (s.return3m * 100 < filters.return3mMin) return false;
+      if (s.return1m * 100 < filters.return1mMin) return false;
+      if (s.returnVsSP500 * 100 < filters.returnVsSP500Min) return false;
+      if (s.pctFromHigh * 100 > filters.pctFromHighMax) return false;
+      if (filters.volumeTrendMin > 0 && s.volumeTrend > 0 && s.volumeTrend < filters.volumeTrendMin) return false;
+    }
+
+    if (enabledDomains.includes("signals")) {
+      if (s.shortPercentOfFloat * 100 > filters.shortFloatMax) return false;
+      if (s.analystRating > 0 && s.analystRating > filters.analystRatingMax) return false;
+    }
+
+    return true;
+  });
+}
